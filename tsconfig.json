@@ -1,0 +1,15 @@
+{
+  "extends": "@daynightprint/config/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noImplicitAny": false,
+     "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@prospectbd/workflows/common": ["src/common/index.ts"],
+      "@prospectbd/workflows/nest": ["src/nest/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
