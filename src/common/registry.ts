@@ -858,7 +858,12 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
         state: "AWAITING_ACCEPTANCE",
         label: "Awaiting Acceptance",
         description: "Job has been created and is pending assignee acceptance.",
-        requiredRoles: ["vendor", "admin"],
+        requiredRoles: [
+          "vendor",
+          "admin",
+          "artwork-designer",
+          "delivery-person",
+        ],
         actions: [
           {
             eventId: "JOB_ACCEPTED",
@@ -877,12 +882,14 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
             label: "Expire",
             icon: "⏳",
             variant: "grayOutline",
+            requiredRoles: ["system"],
           },
           {
             eventId: "JOB_CANCELLED",
             label: "Cancel Job",
             icon: "🚫",
             variant: "graySecondary",
+            requiredRoles: ["admin"],
           },
         ],
         escalations: [
@@ -908,7 +915,12 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
         state: "ACCEPTED",
         label: "Accepted",
         description: "Job has been accepted and is underway.",
-        requiredRoles: ["vendor", "admin"],
+        requiredRoles: [
+          "vendor",
+          "admin",
+          "artwork-designer",
+          "delivery-person",
+        ],
         actions: [
           {
             eventId: "JOB_COMPLETED",
@@ -921,6 +933,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
             label: "Cancel Job",
             icon: "🚫",
             variant: "graySecondary",
+            requiredRoles: ["admin"],
           },
         ],
         escalations: [],
@@ -929,7 +942,12 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
         state: "REJECTED",
         label: "Rejected",
         description: "Job was rejected by the assignee.",
-        requiredRoles: ["admin"],
+        requiredRoles: [
+          "admin",
+          "artwork-designer",
+          "vendor",
+          "delivery-person",
+        ],
         actions: [],
         escalations: [],
       },
@@ -937,7 +955,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
         state: "EXPIRED",
         label: "Expired",
         description: "Job was not accepted within the required timeframe.",
-        requiredRoles: ["admin"],
+        requiredRoles: ["system"],
         actions: [],
         escalations: [],
       },

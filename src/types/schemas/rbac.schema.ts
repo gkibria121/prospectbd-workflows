@@ -6,6 +6,7 @@ export const UserRoleSchema = z.enum([
   "artwork-designer",
   "delivery-person",
   "vendor",
+  "system",
 ]);
 export const UserActionSchema = z.enum(["create", "read", "update", "delete"]);
 export type UserAction = z.infer<typeof UserActionSchema>;
