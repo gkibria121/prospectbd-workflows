@@ -23,6 +23,7 @@ export const AppResourceSchema = z.enum([
   "artwork-run",
   "order-item",
   "order-job",
+  "invoice",
 ]);
 export type AppResource = z.infer<typeof AppResourceSchema>;
 

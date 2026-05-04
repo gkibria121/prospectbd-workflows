@@ -132,31 +132,7 @@ export const WorkflowConfigBaseSchema = z
       });
     }
 
-    // ── initialState must have a transition from "" ────────────────────────
-    const hasInitialTransition = stateMachine.transitions.some(
-      (t) => t.fromState === "" && t.toState === stateMachine.initialState,
-    );
-    if (!hasInitialTransition) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["stateMachine", "initialState"],
-        message: `Initial state "${stateMachine.initialState}" must have a corresponding transition originating from an empty state ("")`,
-      });
-    }
 
-    // ── Initial transitions must not have a payload schema ───────────────────
-    stateMachine.transitions.forEach((t, i) => {
-      if (t.fromState === "") {
-        const eventIndex = events.findIndex((e) => e.eventId === t.eventId);
-        if (eventIndex !== -1 && events[eventIndex].schema) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["events", eventIndex, "schema"],
-            message: `Event "${t.eventId}" is used as an initial transition and cannot have a payload schema`,
-          });
-        }
-      }
-    });
 
     // ── finalStates must exist in states ───────────────────────────────────
     stateMachine.finalStates.forEach((fs, i) => {

@@ -80,6 +80,24 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         timestamp: z.string(),
       }),
     },
+    {
+      icon: "🔄",
+      name: "Initiate Refund",
+      eventId: "REFUND_INITIATED",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "💸",
+      name: "Mark Refunded",
+      eventId: "REFUND_COMPLETED",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
   ],
   stateMachine: {
     states: [
@@ -197,14 +215,44 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        actions: [],
+        actions: [
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "orangePrimary",
+          },
+        ],
         description: "Order successfully delivered.",
         requiredRoles: [],
         escalations: [],
       },
+      {
+        label: "Refund in Progress",
+        state: "REFUND_IN_PROGRESS",
+        actions: [
+          {
+            icon: "💸",
+            label: "Mark Refunded",
+            eventId: "REFUND_COMPLETED",
+            variant: "greenSuccess",
+          },
+        ],
+        description: "Order is undergoing refund.",
+        requiredRoles: ["admin"],
+        escalations: [],
+      },
+      {
+        label: "Refunded",
+        state: "REFUNDED",
+        actions: [],
+        description: "Order has been refunded.",
+        requiredRoles: ["admin"],
+        escalations: [],
+      },
     ],
     initialState: "UNPAID",
-    finalStates: ["DELIVERED"],
+    finalStates: ["REFUNDED"],
     transitions: [
       {
         fromState: "",
@@ -251,8 +299,65 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         eventId: "DELIVERED",
         toState: "DELIVERED",
       },
+      {
+        fromState: "UNPAID",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "PENDING_REVIEW",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "REVIEWED",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "IN_PRODUCTION",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "READY_FOR_COLLECTION",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "COLLECTED",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "IN_TRANSIT",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "DELIVERED",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_COMPLETED",
+        toState: "REFUNDED",
+      },
     ],
-    escalations: [],
+    escalations: [
+      {
+        id: "system-refund-initiation",
+        label: "System Refund Trigger",
+        after: { duration: 365, unit: "days" },
+        action: { type: "raise-event", eventId: "REFUND_INITIATED" },
+      },
+    ],
   },
 });
 
@@ -812,6 +917,77 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     escalations: [],
   },
 });
+export const REFUND_FLOW_CONFIG = defineWorkflow({
+  definitionName: "refund-lifecycle",
+  resourceType: "invoice",
+  events: [
+    {
+      icon: "🔄",
+      name: "Initiate Refund",
+      eventId: "REFUND_INITIATED",
+      schema: z.object({
+        invoiceId: z.string(),
+        orderId: z.string(),
+        amount: z.number(),
+        reason: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "💸",
+      name: "Mark Refunded",
+      eventId: "REFUND_COMPLETED",
+      schema: z.object({
+        invoiceId: z.string(),
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+  ],
+  stateMachine: {
+    states: [
+      {
+        label: "Refund in Progress",
+        state: "REFUND_IN_PROGRESS",
+        actions: [
+          {
+            icon: "💸",
+            label: "Mark Refunded",
+            eventId: "REFUND_COMPLETED",
+            variant: "greenSuccess",
+          },
+        ],
+        description: "Refund has been initiated and is being processed.",
+        requiredRoles: ["admin"],
+        escalations: [],
+      },
+      {
+        label: "Refunded",
+        state: "REFUNDED",
+        actions: [],
+        description: "Refund has been successfully completed.",
+        requiredRoles: [],
+        escalations: [],
+      },
+    ],
+    initialState: "REFUND_IN_PROGRESS",
+    finalStates: ["REFUNDED"],
+    transitions: [
+      {
+        fromState: "",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_COMPLETED",
+        toState: "REFUNDED",
+      },
+    ],
+    escalations: [],
+  },
+});
+
 /**
  * Single source of truth for all workflows in the system.
  * Add new workflows here to automatically update global registries, maps, and types.
@@ -1017,6 +1193,7 @@ export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   quote: QUOTE_FLOW_CONFIG,
   "order-job": JOB_FLOW_CONFIG,
   artwork: ARTWORK_FLOW_CONFIG,
+  refund: REFUND_FLOW_CONFIG,
 });
 
 export const { WORKFLOWS, WORKFLOW_REGISTRY } = WORKFLOW_SYSTEM;
