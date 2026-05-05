@@ -7,7 +7,6 @@ import {
   sleep,
 } from "@temporalio/workflow";
 import * as activities from "./activities";
-import { User } from "../../../types";
 import {
   hasIntersection,
   durationToMs,
@@ -271,7 +270,6 @@ async function handleEscalations(
 
 export async function workflow(
   config: WorkflowConfig,
-  _user: User | undefined = undefined,
   initialData: Record<string, unknown> = {},
 ): Promise<WorkflowInstance> {
   const { finalStates, initialState } = config.stateMachine;

@@ -260,7 +260,7 @@ describe("Temporal workflow()", () => {
 
   it("merges data and handles initial data", async () => {
     const config = createTestConfig();
-    const workflowPromise = workflow(config, undefined, { meta: "test" });
+    const workflowPromise = workflow(config, undefined);
 
     await new Promise((r) => setTimeout(r, 0));
     const signal = getSignalHandler();

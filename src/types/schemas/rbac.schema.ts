@@ -45,13 +45,3 @@ export const UserPermissionSchema = z
     }
   })
   .transform((val) => val as UserPermission);
-
-export type User = {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  isActive: boolean;
-  roles: UserRole[];
-  permissions: UserPermission[];
-};
