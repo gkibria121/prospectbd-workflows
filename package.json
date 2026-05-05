@@ -31,7 +31,8 @@
     }
   },
   "scripts": {
-    "build": "bun run clean && tsc --build",
+    "build": "bun run validate && bun run clean && tsc --build",
+    "validate": "bun src/index.ts",
     "dev": "tsup src/index.ts --watch",
     "watch": "ts-node src/index.ts",
     "pub": "bun run build && npm version patch && npm publish --access public",

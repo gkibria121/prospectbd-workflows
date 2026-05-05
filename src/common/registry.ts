@@ -126,6 +126,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             eventId: "ADMIN_REVIEWED",
             variant: "blueSecondary",
           },
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "redDanger",
+          },
         ],
         description: "Payment received. Awaiting admin review.",
         requiredRoles: ["admin"],
@@ -141,6 +147,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             eventId: "PRODUCTION_STARTED",
             variant: "orangePrimary",
           },
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "redDanger",
+          },
         ],
         description: "Order approved and ready for production.",
         requiredRoles: ["admin", "vendor"],
@@ -155,6 +167,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             label: "Finish Production",
             eventId: "PRODUCTION_COMPLETED",
             variant: "greenTonal",
+          },
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "redDanger",
           },
         ],
         description: "Order is being produced.",
@@ -215,18 +233,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        actions: [
-          {
-            icon: "🔄",
-            label: "Initiate Refund",
-            eventId: "REFUND_INITIATED",
-            variant: "orangePrimary",
-          },
-        ],
+        actions: [],
         description: "Order successfully delivered.",
         requiredRoles: [],
         escalations: [],
       },
+
       {
         label: "Refund in Progress",
         state: "REFUND_IN_PROGRESS",
@@ -236,6 +248,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             label: "Mark Refunded",
             eventId: "REFUND_COMPLETED",
             variant: "greenSuccess",
+          },
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "redDanger",
           },
         ],
         description: "Order is undergoing refund.",
@@ -252,7 +270,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       },
     ],
     initialState: "UNPAID",
-    finalStates: ["REFUNDED"],
+    finalStates: ["REFUNDED", "DELIVERED"],
     transitions: [
       {
         fromState: "",
@@ -300,11 +318,6 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         toState: "DELIVERED",
       },
       {
-        fromState: "UNPAID",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
         fromState: "PENDING_REVIEW",
         eventId: "REFUND_INITIATED",
         toState: "REFUND_IN_PROGRESS",
@@ -320,26 +333,6 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         toState: "REFUND_IN_PROGRESS",
       },
       {
-        fromState: "READY_FOR_COLLECTION",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
-        fromState: "COLLECTED",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
-        fromState: "IN_TRANSIT",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
-        fromState: "DELIVERED",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
         fromState: "REFUND_IN_PROGRESS",
         eventId: "REFUND_INITIATED",
         toState: "REFUND_IN_PROGRESS",
@@ -350,14 +343,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         toState: "REFUNDED",
       },
     ],
-    escalations: [
-      {
-        id: "system-refund-initiation",
-        label: "System Refund Trigger",
-        after: { duration: 365, unit: "days" },
-        action: { type: "raise-event", eventId: "REFUND_INITIATED" },
-      },
-    ],
+    escalations: [],
   },
 });
 
