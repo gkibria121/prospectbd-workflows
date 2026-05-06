@@ -18,7 +18,7 @@ export const AppResourceSchema = z.enum([
   "order",
   "customer",
   "quote",
-  "production-run",
+  "printing-job",
   "delivery-run",
   "artwork-run",
   "order-item",

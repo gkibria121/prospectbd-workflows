@@ -1262,6 +1262,137 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     escalations: [],
   },
 });
+
+export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
+  definitionName: "production-lifecycle",
+  resourceType: "printing-job",
+
+  events: [
+    { eventId: "DRAFT_CREATED", name: "Create Job", icon: "📝" },
+    { eventId: "SENT_TO_VENDOR", name: "Send to Vendor", icon: "📤" },
+    { eventId: "PRODUCTION_STARTED", name: "Start Production", icon: "⚙️" },
+    {
+      eventId: "READY_FOR_COLLECTION",
+      name: "Ready for Collection",
+      icon: "📤",
+    },
+    { eventId: "PRODUCTION_COMPLETED", name: "Complete Production", icon: "✅" },
+  ],
+
+  stateMachine: {
+    initialState: "PENDING",
+    finalStates: ["COMPLETED"],
+
+    states: [
+      {
+        state: "PENDING",
+        label: "Pending",
+        description: "Job created, awaiting vendor assignment or dispatch.",
+        requiredRoles: ["admin"],
+        actions: [
+          {
+            eventId: "SENT_TO_VENDOR",
+            label: "Send to Vendor",
+            icon: "📤",
+            variant: "bluePrimary",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "SENT_TO_VENDOR",
+        label: "Sent to Vendor",
+        description: "Job sent to vendor, awaiting production start.",
+        requiredRoles: ["vendor", "admin"],
+        actions: [
+          {
+            eventId: "PRODUCTION_STARTED",
+            label: "Start Production",
+            icon: "⚙️",
+            variant: "orangePrimary",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "IN_PRODUCTION",
+        label: "In Production",
+        description: "Job is currently in production.",
+        requiredRoles: ["vendor", "admin"],
+        actions: [
+          {
+            eventId: "READY_FOR_COLLECTION",
+            label: "Mark Ready for Collection",
+            icon: "📤",
+            variant: "blueSecondary",
+          },
+          {
+            eventId: "PRODUCTION_COMPLETED",
+            label: "Finish Production",
+            icon: "✅",
+            variant: "greenSuccess",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "READY_FOR_COLLECTION",
+        label: "Ready for Collection",
+        description: "Job finished and ready for pickup.",
+        requiredRoles: ["vendor", "admin"],
+        actions: [
+          {
+            eventId: "PRODUCTION_COMPLETED",
+            label: "Finish Production",
+            icon: "✅",
+            variant: "greenSuccess",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "COMPLETED",
+        label: "Completed",
+        description: "Job has been fully completed.",
+        requiredRoles: [],
+        actions: [],
+        escalations: [],
+      },
+    ],
+
+    transitions: [
+      { fromState: "", toState: "PENDING", eventId: "DRAFT_CREATED" },
+      {
+        fromState: "PENDING",
+        toState: "SENT_TO_VENDOR",
+        eventId: "SENT_TO_VENDOR",
+      },
+      {
+        fromState: "SENT_TO_VENDOR",
+        toState: "IN_PRODUCTION",
+        eventId: "PRODUCTION_STARTED",
+      },
+      {
+        fromState: "IN_PRODUCTION",
+        toState: "READY_FOR_COLLECTION",
+        eventId: "READY_FOR_COLLECTION",
+      },
+      {
+        fromState: "IN_PRODUCTION",
+        toState: "COMPLETED",
+        eventId: "PRODUCTION_COMPLETED",
+      },
+      {
+        fromState: "READY_FOR_COLLECTION",
+        toState: "COMPLETED",
+        eventId: "PRODUCTION_COMPLETED",
+      },
+    ],
+
+    escalations: [],
+  },
+});
+
 export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   order: ORDER_FLOW_CONFIG,
   "order-item": ORDER_ITEM_FLOW_CONFIG,
@@ -1269,6 +1400,7 @@ export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   "order-job": JOB_FLOW_CONFIG,
   artwork: ARTWORK_FLOW_CONFIG,
   refund: REFUND_FLOW_CONFIG,
+  production: PRODUCTION_FLOW_CONFIG,
 });
 
 export const { WORKFLOWS, WORKFLOW_REGISTRY } = WORKFLOW_SYSTEM;
