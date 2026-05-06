@@ -67,16 +67,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         timestamp: z.string(),
       }),
     },
-    {
-      icon: "📋",
-      name: "Finish Production",
-      eventId: "PRODUCTION_COMPLETED",
-      schema: z.object({
-        orderId: z.string(),
-        orderNo: z.string(),
-        timestamp: z.string(),
-      }),
-    },
+
     {
       icon: "📤",
       name: "Collect Order",
@@ -192,7 +183,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
           {
             icon: "📋",
             label: "Finish Production",
-            eventId: "PRODUCTION_COMPLETED",
+            eventId: "READY_FOR_COLLECTION",
             variant: "greenTonal",
           },
           {
@@ -339,7 +330,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       },
       {
         fromState: "IN_PRODUCTION",
-        eventId: "PRODUCTION_COMPLETED",
+        eventId: "READY_FOR_COLLECTION",
         toState: "READY_FOR_COLLECTION",
       },
       {
@@ -437,16 +428,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
         timestamp: z.string(),
       }),
     },
-    {
-      icon: "📋",
-      name: "Finish Production",
-      eventId: "PRODUCTION_COMPLETED",
-      schema: z.object({
-        orderId: z.string(),
-        orderNo: z.string(),
-        timestamp: z.string(),
-      }),
-    },
+
     {
       icon: "📤",
       name: "Collect Order",
@@ -517,7 +499,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
           {
             icon: "📋",
             label: "Finish Production",
-            eventId: "PRODUCTION_COMPLETED",
+            eventId: "READY_FOR_COLLECTION",
             variant: "greenTonal",
           },
         ],
@@ -605,7 +587,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       },
       {
         fromState: "IN_PRODUCTION",
-        eventId: "PRODUCTION_COMPLETED",
+        eventId: "READY_FOR_COLLECTION",
         toState: "READY_FOR_COLLECTION",
       },
       {

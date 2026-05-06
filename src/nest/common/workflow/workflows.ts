@@ -128,11 +128,9 @@ function applyTransition(
   state.lastEventId = fullEventId;
   state.data = { ...state.data, ...eventData };
 
-  /*
   console.log(
     `[Workflow: ${config.definitionName}] Transitioned: ${fromStep} --(${fullEventId})--> ${toStep}`,
   );
-*/
 }
 
 // ─── Signal & Query Registration ─────────────────────────────────────────────
