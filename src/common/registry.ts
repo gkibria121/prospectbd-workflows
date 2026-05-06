@@ -1269,7 +1269,6 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
 
   events: [
     { eventId: "DRAFT_CREATED", name: "Create Job", icon: "📝" },
-    { eventId: "SENT_TO_VENDOR", name: "Send to Vendor", icon: "📤" },
     { eventId: "PRODUCTION_STARTED", name: "Start Production", icon: "⚙️" },
     {
       eventId: "READY_FOR_COLLECTION",
@@ -1287,29 +1286,14 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       {
         state: "PENDING",
         label: "Pending",
-        description: "Job created, awaiting vendor assignment or dispatch.",
+        description: "Job created, awaiting production start.",
         requiredRoles: ["admin"],
-        actions: [
-          {
-            eventId: "SENT_TO_VENDOR",
-            label: "Send to Vendor",
-            icon: "📤",
-            variant: "bluePrimary",
-          },
-        ],
-        escalations: [],
-      },
-      {
-        state: "SENT_TO_VENDOR",
-        label: "Sent to Vendor",
-        description: "Job sent to vendor, awaiting production start.",
-        requiredRoles: ["vendor", "admin"],
         actions: [
           {
             eventId: "PRODUCTION_STARTED",
             label: "Start Production",
             icon: "⚙️",
-            variant: "orangePrimary",
+            variant: "bluePrimary",
           },
         ],
         escalations: [],
@@ -1324,13 +1308,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
             eventId: "READY_FOR_COLLECTION",
             label: "Mark Ready for Collection",
             icon: "📤",
-            variant: "blueSecondary",
-          },
-          {
-            eventId: "PRODUCTION_COMPLETED",
-            label: "Finish Production",
-            icon: "✅",
-            variant: "greenSuccess",
+            variant: "orangePrimary",
           },
         ],
         escalations: [],
@@ -1364,11 +1342,6 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       { fromState: "", toState: "PENDING", eventId: "DRAFT_CREATED" },
       {
         fromState: "PENDING",
-        toState: "SENT_TO_VENDOR",
-        eventId: "SENT_TO_VENDOR",
-      },
-      {
-        fromState: "SENT_TO_VENDOR",
         toState: "IN_PRODUCTION",
         eventId: "PRODUCTION_STARTED",
       },
@@ -1376,11 +1349,6 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
         fromState: "IN_PRODUCTION",
         toState: "READY_FOR_COLLECTION",
         eventId: "READY_FOR_COLLECTION",
-      },
-      {
-        fromState: "IN_PRODUCTION",
-        toState: "COMPLETED",
-        eventId: "PRODUCTION_COMPLETED",
       },
       {
         fromState: "READY_FOR_COLLECTION",
