@@ -40,3 +40,22 @@ export type PublishWorkflowEventPayload = {
     data: GetEventPayload<E>;
   };
 }[WorkflowEventId];
+
+export function getRequiredEvent<
+  K extends keyof typeof WORKFLOWS,
+  S extends (typeof WORKFLOWS)[K]["stateMachine"]["states"][number]["state"],
+>(key: K, state: S) {
+  const workflow = WORKFLOWS[key];
+
+  const targetTransition = workflow.stateMachine.transitions.find(
+    (value) => value.toState === state,
+  );
+
+  if (!targetTransition) {
+    throw new Error(
+      `No transition found to state "${state}" in workflow "${workflow.definitionName}"`,
+    );
+  }
+
+  return WorkflowEventIdMap[key][targetTransition.eventId];
+}
