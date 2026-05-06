@@ -12,9 +12,11 @@ export function createPublishEventActivity(emitter: {
   emit: (event: string, payload: any) => boolean;
 }) {
   return async function publishEvent(payload: WorkflowInstance): Promise<void> {
+/*
     console.log(
       `[${payload.workflowId}] ${payload.event} → ${JSON.stringify(payload.currentState?.state)}`,
     );
+*/
 
     if (payload.event) {
       const eventName = `workflow.${payload.event}`;
@@ -35,8 +37,10 @@ export function createPublishEventActivity(emitter: {
  * Used when the worker doesn't inject an EventEmitter2.
  */
 export async function publishEvent(payload: WorkflowInstance): Promise<void> {
+/*
   console.log(
     `[${payload.workflowId}] ${payload.event} → ${payload.currentState}`,
   );
+*/
   await new Promise((resolve) => resolve({}));
 }

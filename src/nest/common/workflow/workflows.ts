@@ -128,9 +128,11 @@ function applyTransition(
   state.lastEventId = fullEventId;
   state.data = { ...state.data, ...eventData };
 
+  /*
   console.log(
     `[Workflow: ${config.definitionName}] Transitioned: ${fromStep} --(${fullEventId})--> ${toStep}`,
   );
+*/
 }
 
 // ─── Signal & Query Registration ─────────────────────────────────────────────
@@ -157,9 +159,11 @@ async function handleEscalations(
   const workflowStartTime = new Date(state.startTime).getTime();
   const stateEntryTime = new Date(state.stateEntryTime).getTime();
 
+  /*
   console.log(
     `[Workflow: ${config.definitionName}] Entered escalation loop for state "${state.currentStateId}"`,
   );
+*/
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -185,13 +189,17 @@ async function handleEscalations(
     ].filter((e) => !state.triggeredEscalations.includes(e.id));
 
     if (activeEscalations.length === 0) {
+      /*
       console.log(
         `[Workflow: ${config.definitionName}] No active escalations for state "${frozenStateId}". Waiting for transition...`,
       );
+*/
       await condition(() => state.currentStateId !== frozenStateId);
+      /*
       console.log(
         `[Workflow: ${config.definitionName}] State transitioned from "${frozenStateId}" to "${state.currentStateId}". Exiting escalation loop.`,
       );
+*/
       break;
     }
 
@@ -207,25 +215,31 @@ async function handleEscalations(
     const nextEscalation = withDeadlines[0];
     const waitMs = Math.max(0, nextEscalation.deadline - now);
 
+    /*
     console.log(
       `[Workflow: ${config.definitionName}] Next escalation "${nextEscalation.id}" in ${Math.round(waitMs / 1000)}s`,
     );
+*/
 
     const stateChanged = () => state.currentStateId !== frozenStateId;
     const resolved = await condition(stateChanged, waitMs);
 
     if (stateChanged()) {
+      /*
       console.log(
         `[Workflow: ${config.definitionName}] State changed during wait. Exiting escalation loop.`,
       );
+*/
       break;
     }
 
     // 3. Timed out — Fire escalation
     if (!resolved) {
+      /*
       console.log(
         `[Workflow: ${config.definitionName}] Firing escalation "${nextEscalation.id}" (${nextEscalation.action.type})`,
       );
+*/
       state.triggeredEscalations.push(nextEscalation.id);
 
       if (nextEscalation.action.type === "raise-event") {
@@ -251,15 +265,19 @@ async function handleEscalations(
           unit: nextEscalation.after.unit,
           firedAt: new Date().toISOString(),
         });
+        /*
         console.log(
           `[Workflow: ${config.definitionName}] SLA Alert sent for "${nextEscalation.id}". Continuing loop in state "${state.currentStateId}"...`,
         );
+*/
       }
 
       if (state.currentStateId !== frozenStateId) {
+        /*
         console.log(
           `[Workflow: ${config.definitionName}] Escalation caused state change. Exiting loop.`,
         );
+*/
         break;
       }
     }
