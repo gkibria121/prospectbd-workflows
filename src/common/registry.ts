@@ -21,6 +21,33 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       }),
     },
     {
+      icon: "↩️",
+      name: "Cancel Refund (In Pending Review)",
+      eventId: "REFUND_CANCELED_IN_PENDING_REVIEW",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "↩️",
+      name: "Cancel Refund (In Reviewed)",
+      eventId: "REFUND_CANCELED_IN_REVIEWED",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "↩️",
+      name: "Cancel Refund (In Production)",
+      eventId: "REFUND_CANCELED_IN_PRODUCTION",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
       icon: "✅",
       name: "Review Order",
       eventId: "ADMIN_REVIEWED",
@@ -255,6 +282,24 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             eventId: "REFUND_INITIATED",
             variant: "redDanger",
           },
+          {
+            icon: "↩️",
+            label: "Cancel Refund → Pending Review",
+            eventId: "REFUND_CANCELED_IN_PENDING_REVIEW",
+            variant: "graySecondary",
+          },
+          {
+            icon: "↩️",
+            label: "Cancel Refund → Reviewed",
+            eventId: "REFUND_CANCELED_IN_REVIEWED",
+            variant: "graySecondary",
+          },
+          {
+            icon: "↩️",
+            label: "Cancel Refund → In Production",
+            eventId: "REFUND_CANCELED_IN_PRODUCTION",
+            variant: "graySecondary",
+          },
         ],
         description: "Order is undergoing refund.",
         requiredRoles: ["admin"],
@@ -341,6 +386,21 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         fromState: "REFUND_IN_PROGRESS",
         eventId: "REFUND_COMPLETED",
         toState: "REFUNDED",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_CANCELED_IN_PENDING_REVIEW",
+        toState: "PENDING_REVIEW",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_CANCELED_IN_REVIEWED",
+        toState: "REVIEWED",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_CANCELED_IN_PRODUCTION",
+        toState: "IN_PRODUCTION",
       },
     ],
     escalations: [],
