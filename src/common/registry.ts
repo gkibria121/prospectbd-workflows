@@ -989,6 +989,16 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         timestamp: z.string(),
       }),
     },
+    {
+      icon: "↩️",
+      name: "Cancel Refund",
+      eventId: "REFUND_CANCELED",
+      schema: z.object({
+        invoiceId: z.string(),
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
   ],
   stateMachine: {
     states: [
@@ -1001,6 +1011,12 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
             label: "Mark Refunded",
             eventId: "REFUND_COMPLETED",
             variant: "greenSuccess",
+          },
+          {
+            icon: "↩️",
+            label: "Cancel Refund",
+            eventId: "REFUND_CANCELED",
+            variant: "graySecondary",
           },
         ],
         description: "Refund has been initiated and is being processed.",
@@ -1015,9 +1031,17 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         requiredRoles: [],
         escalations: [],
       },
+      {
+        label: "Paid",
+        state: "PAID",
+        actions: [],
+        description: "Refund was cancelled and invoice is back to paid status.",
+        requiredRoles: [],
+        escalations: [],
+      },
     ],
     initialState: "REFUND_IN_PROGRESS",
-    finalStates: ["REFUNDED"],
+    finalStates: ["REFUNDED", "PAID"],
     transitions: [
       {
         fromState: "",
@@ -1028,6 +1052,11 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         fromState: "REFUND_IN_PROGRESS",
         eventId: "REFUND_COMPLETED",
         toState: "REFUNDED",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_CANCELED",
+        toState: "PAID",
       },
     ],
     escalations: [],
