@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   WorkflowConfig,
   WorkflowConfigSchema,
+  WorkflowDto,
   WorkFlowStep,
 } from "./workflow-schema";
 
@@ -329,4 +330,98 @@ export function calculateTreeLayout(config: WorkflowConfig): TreeLayout {
     }));
 
   return { nodes, edges, maxDepth, maxWidth };
+}
+export type WorkflowGraph = {
+  nodes: Map<string, StateMeta>;
+  // fromState → eventId → toState  (O(1) transition lookup)
+  transitions: Map<string, Map<string, string>>;
+  // Set of "fromState::eventId" pairs that were actually traversed
+  traversedEdges: Set<string>;
+  initialState: string;
+  finalStates: Set<string>;
+};
+
+export type StateMeta = {
+  label: string;
+  description: string;
+  actions: WorkflowDto["config"]["stateMachine"]["states"][number]["actions"];
+  requiredRoles: string[];
+  isFinal: boolean;
+  isActive: boolean;
+  isVisited: boolean;
+};
+
+export function buildGraph(workflow: WorkflowDto): WorkflowGraph {
+  const nodes = new Map<string, StateMeta>();
+  const transitions = new Map<string, Map<string, string>>();
+  const finalStates = new Set(workflow.config.stateMachine.finalStates);
+
+  const activeStateId =
+    workflow.activeState?.state ||
+    workflow.config.stateMachine.initialState;
+
+  // Build visited set from history — every toStep that was reached
+  const visitedStates = new Set<string>(
+    (workflow.history ?? []).map((h) => h.toStep),
+  );
+  // The initial state is always considered visited
+  visitedStates.add(workflow.config.stateMachine.initialState);
+
+  // Build traversed edges set: "fromState::eventId" for each history entry
+  const traversedEdges = new Set<string>(
+    (workflow.history ?? [])
+      .filter((h) => h.fromStep !== null)
+      .map((h) => `${h.fromStep}::${h.eventId}`),
+  );
+
+  for (const s of workflow.config.stateMachine.states) {
+    nodes.set(s.state, {
+      label: s.label,
+      description: s.description,
+      actions: s.actions,
+      requiredRoles: s.requiredRoles,
+      isActive: s.state === activeStateId,
+      isVisited: visitedStates.has(s.state),
+      isFinal: finalStates.has(s.state),
+    });
+    transitions.set(s.state, new Map());
+  }
+
+  for (const t of workflow.config.stateMachine.transitions) {
+    const from = t.fromState || "__ENTRY__";
+    if (!transitions.has(from)) transitions.set(from, new Map());
+    transitions.get(from)!.set(t.eventId, t.toState);
+  }
+
+  return {
+    nodes,
+    transitions,
+    traversedEdges,
+    initialState: workflow.config.stateMachine.initialState,
+    finalStates,
+  };
+}
+
+/**
+ * Returns true if the edge from `fromState` via `eventId` was actually
+ * traversed during this workflow's history.
+ */
+export function wasEdgeTraversed(
+  graph: WorkflowGraph,
+  fromState: string,
+  eventId: string,
+): boolean {
+  return graph.traversedEdges.has(`${fromState}::${eventId}`);
+}
+
+// Usage — O(1) both lookups
+function transition(
+  graph: WorkflowGraph,
+  currentState: string,
+  event: string,
+): string {
+  const next = graph.transitions.get(currentState)?.get(event);
+  if (!next)
+    throw new Error(`No transition from "${currentState}" on "${event}"`);
+  return next;
 }
