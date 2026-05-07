@@ -690,6 +690,12 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
             variant: "bluePrimary",
           },
           {
+            eventId: "CUSTOMER_APPROVED",
+            label: "Approve",
+            icon: "✅",
+            variant: "greenSuccess",
+          },
+          {
             eventId: "EDITED",
             label: "Edit",
             icon: "✏️",
@@ -782,6 +788,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
     transitions: [
       { fromState: "", toState: "DRAFT", eventId: "DRAFT_CREATED" },
       { fromState: "DRAFT", toState: "DRAFT", eventId: "EDITED" },
+      { fromState: "DRAFT", toState: "ACCEPTED", eventId: "CUSTOMER_APPROVED" },
       { fromState: "DRAFT", toState: "SENT", eventId: "SENT_TO_CUSTOMER" },
       { fromState: "DRAFT", toState: "EXPIRED", eventId: "EXPIRED" },
       { fromState: "SENT", toState: "ACCEPTED", eventId: "CUSTOMER_APPROVED" },
@@ -1257,7 +1264,11 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       name: "Ready for Collection",
       icon: "📤",
     },
-    { eventId: "PRODUCTION_COMPLETED", name: "Complete Production", icon: "✅" },
+    {
+      eventId: "PRODUCTION_COMPLETED",
+      name: "Complete Production",
+      icon: "✅",
+    },
   ],
 
   stateMachine: {
