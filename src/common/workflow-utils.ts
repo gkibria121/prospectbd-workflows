@@ -45,7 +45,7 @@ export function resolveDisplayPath(
   currentStateId: string,
   history?: WorkflowHistory,
 ): string[] {
-  const { initialState, finalStates, transitions } = config.stateMachine;
+  const { initialState, finalStates, transitions, states } = config.stateMachine;
 
   // Build adjacency list
   const adjacency = new Map<string, string[]>();
@@ -59,6 +59,25 @@ export function resolveDisplayPath(
 
   if (allPaths.length === 0) return [initialState];
 
+  // Filter out "dead-end" or "failure" paths that haven't been entered yet
+  const visitedStates = new Set<string>(
+    history?.map((h) => h.toStep).filter((s): s is string => !!s) ?? [],
+  );
+  visitedStates.add(initialState);
+  const stateProgress = new Map(states.map((s) => [s.state, s.progress]));
+
+  const filteredPaths = allPaths.filter((path) => {
+    // A path is disqualified if it contains any state that:
+    // 1. Has 0 progress (off-path/terminal failure)
+    // 2. HAS NOT BEEN VISITED yet
+    return !path.some(
+      (stateId) => !visitedStates.has(stateId) && stateProgress.get(stateId) === 0,
+    );
+  });
+
+  // Use filteredPaths for the rest of the logic, fallback to allPaths if filtered results in nothing
+  const pathsToConsider = filteredPaths.length > 0 ? filteredPaths : allPaths;
+
   // 1. If history is provided, find the path that matches the actual traversed edges
   if (history && history.length > 0) {
     const traversedEdges = new Set(
@@ -67,7 +86,7 @@ export function resolveDisplayPath(
         .map((h) => `${h.fromStep}::${h.toStep}`),
     );
 
-    const scoredPaths = allPaths.map((path) => {
+    const scoredPaths = pathsToConsider.map((path) => {
       let score = 0;
       for (let i = 0; i < path.length - 1; i++) {
         if (traversedEdges.has(`${path[i]}::${path[i + 1]}`)) {
@@ -91,15 +110,15 @@ export function resolveDisplayPath(
   }
 
   // 2. Fallback: Sort descending by length so index-0 is always the longest
-  allPaths.sort((a, b) => b.length - a.length);
+  pathsToConsider.sort((a, b) => b.length - a.length);
 
-  const longestPath = allPaths[0];
+  const longestPath = pathsToConsider[0];
 
   // If currentState lives on the longest path, use it
   if (longestPath.includes(currentStateId)) return longestPath;
 
   // Otherwise, find the longest path that contains currentState
-  const fallback = allPaths.find((p) => p.includes(currentStateId));
+  const fallback = pathsToConsider.find((p) => p.includes(currentStateId));
   return fallback ?? longestPath;
 }
 
