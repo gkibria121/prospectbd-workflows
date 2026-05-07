@@ -231,7 +231,7 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
       ),
     ]),
   ) as {
-    [K in keyof T]: T[K]["stateMachine"]["states"][number]["state"];
+    [K in keyof T]: Record<T[K]["stateMachine"]["states"][number]["state"], string>;
   };
   const eventIds = Object.values(workflows).flatMap((flow) =>
     Object.values(flow.Events),
@@ -247,6 +247,17 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     return { ...acc, ...schemas };
   }, {} as any);
 
+  const progressMap = Object.fromEntries(
+    Object.entries(workflows).map(([key, flow]) => [
+      key,
+      Object.fromEntries(
+        flow.stateMachine.states.map((s: any) => [s.state, s.progress]),
+      ),
+    ]),
+  ) as {
+    [K in keyof T]: Record<T[K]["stateMachine"]["states"][number]["state"], number>;
+  };
+
   return {
     WORKFLOWS: workflows,
     WORKFLOW_REGISTRY: registry,
@@ -254,6 +265,7 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     EVENT_IDS: eventIds as string[],
     EVENT_SCHEMAS: eventSchemas,
     STATE_MAP: stateMap,
+    PROGRESS_MAP: progressMap,
     /** Validates payload data against the schema defined for the given eventId (if any) */
     validateEventPayload: (eventId: string, data: any) => {
       const schema = eventSchemas[eventId];

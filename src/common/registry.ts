@@ -122,7 +122,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Awaiting Payment",
         state: "AWAITING_PAYMENT",
-        progress: 0, // step 0/7
+        progress: 10,
         actions: [
           {
             icon: "💳",
@@ -138,7 +138,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Pending Review",
         state: "PENDING_REVIEW",
-        progress: 14.3, // step 1/7
+        progress: 20,
         actions: [
           {
             icon: "✅",
@@ -160,7 +160,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Reviewed",
         state: "REVIEWED",
-        progress: 28.6, // step 2/7
+        progress: 30,
         actions: [
           {
             icon: "⚙️",
@@ -182,7 +182,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Production",
         state: "IN_PRODUCTION",
-        progress: 42.9, // step 3/7
+        progress: 40,
         actions: [
           {
             icon: "📋",
@@ -204,7 +204,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Ready for Collection",
         state: "READY_FOR_COLLECTION",
-        progress: 57.1, // step 4/7
+        progress: 50,
         actions: [
           {
             icon: "📤",
@@ -226,7 +226,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Collected",
         state: "COLLECTED",
-        progress: 71.4, // step 5/7
+        progress: 60,
         actions: [
           {
             icon: "🚚",
@@ -242,7 +242,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Transit",
         state: "IN_TRANSIT",
-        progress: 85.7, // step 6/7
+        progress: 70,
         actions: [
           {
             icon: "🎉",
@@ -258,7 +258,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        progress: 100, // step 7/7
+        progress: 100,
         actions: [],
         description: "Order successfully delivered.",
         requiredRoles: [],
@@ -480,7 +480,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Awaiting Payment",
         state: "AWAITING_PAYMENT",
-        progress: 0, // step 0/7
+        progress: 10,
         actions: [
           {
             icon: "💳",
@@ -496,7 +496,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Pending Review",
         state: "PENDING_REVIEW",
-        progress: 14.3, // step 1/7
+        progress: 20,
         actions: [
           {
             icon: "✅",
@@ -511,7 +511,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       },
       {
         label: "Reviewed",
-        progress: 28.6, // step 2/7
+        progress: 30,
         state: "REVIEWED",
         actions: [
           {
@@ -528,7 +528,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Production",
         state: "IN_PRODUCTION",
-        progress: 42.9, // step 3/7
+        progress: 50,
         actions: [
           {
             icon: "📋",
@@ -544,7 +544,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Ready for Collection",
         state: "READY_FOR_COLLECTION",
-        progress: 57.1, // step 4/7
+        progress: 70,
         actions: [
           {
             icon: "📤",
@@ -566,7 +566,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Collected",
         state: "COLLECTED",
-        progress: 71.4, // step 5/7
+        progress: 90,
         actions: [
           {
             icon: "🚚",
@@ -582,7 +582,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Transit",
         state: "IN_TRANSIT",
-        progress: 85.7, // step 6/7
+        progress: 80,
         actions: [
           {
             icon: "🎉",
@@ -598,7 +598,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        progress: 100, // step 7/7
+        progress: 100,
         actions: [],
         description: "Order successfully delivered.",
         requiredRoles: [],
@@ -874,12 +874,12 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
 
   stateMachine: {
     initialState: "ARTWORK_PENDING",
-    finalStates: ["ARTWORK_APPROVED"],
+    finalStates: ["ARTWORK_APPROVED", "ARTWORK_REJECTED"],
 
     states: [
       {
         state: "ARTWORK_PENDING",
-        progress: 0, // step 0/2
+        progress: 50,
         label: "Artwork Pending",
         description: "Waiting for designer to upload initial artwork.",
         requiredRoles: ["artwork-designer", "admin"],
@@ -912,7 +912,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
       {
         state: "ARTWORK_IN_REVIEW",
         label: "In Review",
-        progress: 50, // step 1/2 (parallel tier with IN_REVISION)
+        progress: 80,
         description: "Admin is performing final review of the artwork.",
         requiredRoles: ["admin", "artwork-designer"],
         actions: [
@@ -936,7 +936,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
       {
         state: "ARTWORK_IN_REVISION",
         label: "In Revision",
-        progress: 50, // step 1/2 (parallel tier with IN_REVIEW)
+        progress: 70,
         description: "Designer is updating artwork based on revision request.",
         requiredRoles: ["admin", "artwork-designer"],
         actions: [
@@ -949,10 +949,41 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
         ],
         escalations: [],
       },
-
+      {
+        state: "ARTWORK_RECEIVED",
+        label: "Received",
+        progress: 60,
+        description: "Artwork has been received and is awaiting review.",
+        requiredRoles: ["admin"],
+        actions: [
+          {
+            eventId: "ARTWORK_APPROVED",
+            label: "Approve Artwork",
+            icon: "✅",
+            variant: "greenSuccess",
+          },
+          {
+            eventId: "REVISION_REQUESTED",
+            label: "Request Revision",
+            icon: "✏️",
+            variant: "graySecondary",
+            requiredRoles: ["admin"],
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "ARTWORK_REJECTED",
+        label: "Rejected",
+        progress: 0,
+        description: "Artwork has been rejected.",
+        requiredRoles: ["admin"],
+        actions: [],
+        escalations: [],
+      },
       {
         state: "ARTWORK_APPROVED",
-        progress: 100, // step 2/2
+        progress: 100,
         label: "Artwork Approved",
         description: "Artwork has been fully approved.",
         requiredRoles: [],
@@ -965,11 +996,21 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
       // Initial creation
       { fromState: "", toState: "ARTWORK_PENDING", eventId: "DRAFT_CREATED" },
 
-      // Normal path: Pending -> Review -> Approved
+      // Normal path: Pending -> Received -> Review -> Approved
       {
         fromState: "ARTWORK_PENDING",
-        toState: "ARTWORK_IN_REVIEW",
+        toState: "ARTWORK_RECEIVED",
         eventId: "ARTWORK_UPLOADED",
+      },
+      {
+        fromState: "ARTWORK_RECEIVED",
+        toState: "ARTWORK_APPROVED",
+        eventId: "ARTWORK_APPROVED",
+      },
+      {
+        fromState: "ARTWORK_RECEIVED",
+        toState: "ARTWORK_IN_REVISION",
+        eventId: "REVISION_REQUESTED",
       },
       {
         fromState: "ARTWORK_IN_REVIEW",
@@ -1154,7 +1195,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "AWAITING_ACCEPTANCE",
         label: "Awaiting Acceptance",
-        progress: 0, // step 0/2
+        progress: 5,
         description: "Job has been created and is pending assignee acceptance.",
         requiredRoles: [
           "vendor",
@@ -1212,7 +1253,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "ACCEPTED",
         label: "Accepted",
-        progress: 50, // step 1/2
+        progress: 10,
         description: "Job has been accepted and is underway.",
         requiredRoles: [
           "vendor",
@@ -1240,7 +1281,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "REJECTED",
         label: "Rejected",
-        progress: 0, // off happy-path terminal
+        progress: 0,
         description: "Job was rejected by the assignee.",
         requiredRoles: [
           "admin",
@@ -1254,7 +1295,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "EXPIRED",
         label: "Expired",
-        progress: 0, // off happy-path terminal
+        progress: 0,
         description: "Job was not accepted within the required timeframe.",
         requiredRoles: ["system"],
         actions: [],
@@ -1263,7 +1304,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "COMPLETED",
         label: "Completed",
-        progress: 100, // step 2/2
+        progress: 100,
         description: "Job has been successfully completed.",
         requiredRoles: [],
         actions: [],
@@ -1272,7 +1313,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "CANCELLED",
         label: "Cancelled",
-        progress: 0, // off happy-path terminal
+        progress: 0,
         description: "Job was cancelled.",
         requiredRoles: ["admin"],
         actions: [],
@@ -1341,7 +1382,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
     states: [
       {
         state: "PENDING",
-        progress: 0, // step 0/3
+        progress: 50,
         label: "Pending",
         description: "Job created, awaiting production start.",
         requiredRoles: ["admin"],
@@ -1358,7 +1399,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       {
         state: "IN_PRODUCTION",
         label: "In Production",
-        progress: 33.3, // step 1/3
+        progress: 80,
         description: "Job is currently in production.",
         requiredRoles: ["vendor", "admin"],
         actions: [
@@ -1374,7 +1415,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       {
         state: "READY_FOR_COLLECTION",
         label: "Ready for Collection",
-        progress: 66.7, // step 2/3
+        progress: 90,
         description: "Job finished and ready for pickup.",
         requiredRoles: ["vendor", "admin"],
         actions: [
@@ -1389,7 +1430,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       },
       {
         state: "COMPLETED",
-        progress: 100, // step 3/3
+        progress: 100,
         label: "Completed",
         description: "Job has been fully completed.",
         requiredRoles: [],
@@ -1421,6 +1462,104 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
   },
 });
 
+export const DELIVERY_FLOW_CONFIG = defineWorkflow({
+  definitionName: "delivery-lifecycle",
+  resourceType: "delivery-run",
+
+  events: [
+    { eventId: "DRAFT_CREATED", name: "Create Job", icon: "📝" },
+    { eventId: "COLLECTED", name: "Collect from Production", icon: "📤" },
+    { eventId: "SHIPPED", name: "Start Delivery", icon: "🚚" },
+    { eventId: "DELIVERED", name: "Mark Delivered", icon: "🎉" },
+  ],
+
+  stateMachine: {
+    initialState: "PENDING",
+    finalStates: ["DELIVERED"],
+
+    states: [
+      {
+        state: "PENDING",
+        progress: 10,
+        label: "Pending",
+        description: "Delivery job created, awaiting collection.",
+        requiredRoles: ["admin"],
+        actions: [
+          {
+            eventId: "COLLECTED",
+            label: "Collect",
+            icon: "📤",
+            variant: "bluePrimary",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "COLLECTED_FROM_PRODUCTION",
+        label: "Collected",
+        progress: 40,
+        description: "Package collected from production.",
+        requiredRoles: ["delivery-person", "admin"],
+        actions: [
+          {
+            eventId: "SHIPPED",
+            label: "Start Delivery",
+            icon: "🚚",
+            variant: "orangePrimary",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "IN_TRANSIT",
+        label: "In Transit",
+        progress: 70,
+        description: "Package is on the way.",
+        requiredRoles: ["delivery-person", "admin"],
+        actions: [
+          {
+            eventId: "DELIVERED",
+            label: "Mark Delivered",
+            icon: "🎉",
+            variant: "greenSuccess",
+          },
+        ],
+        escalations: [],
+      },
+      {
+        state: "DELIVERED",
+        progress: 100,
+        label: "Delivered",
+        description: "Package successfully delivered.",
+        requiredRoles: [],
+        actions: [],
+        escalations: [],
+      },
+    ],
+
+    transitions: [
+      { fromState: "", toState: "PENDING", eventId: "DRAFT_CREATED" },
+      {
+        fromState: "PENDING",
+        toState: "COLLECTED_FROM_PRODUCTION",
+        eventId: "COLLECTED",
+      },
+      {
+        fromState: "COLLECTED_FROM_PRODUCTION",
+        toState: "IN_TRANSIT",
+        eventId: "SHIPPED",
+      },
+      {
+        fromState: "IN_TRANSIT",
+        toState: "DELIVERED",
+        eventId: "DELIVERED",
+      },
+    ],
+
+    escalations: [],
+  },
+});
+
 export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   order: ORDER_FLOW_CONFIG,
   "order-item": ORDER_ITEM_FLOW_CONFIG,
@@ -1429,6 +1568,7 @@ export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   artwork: ARTWORK_FLOW_CONFIG,
   refund: REFUND_FLOW_CONFIG,
   production: PRODUCTION_FLOW_CONFIG,
+  delivery: DELIVERY_FLOW_CONFIG,
 });
 
 export const { WORKFLOWS, WORKFLOW_REGISTRY } = WORKFLOW_SYSTEM;
