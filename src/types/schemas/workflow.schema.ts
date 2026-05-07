@@ -42,6 +42,7 @@ export const StateMachineStepSchema = z.object({
   state: z.string(),
   label: z.string(),
   description: z.string(),
+  progress: z.number().min(0).max(100).default(0),
   requiredRoles: z.array(UserRoleSchema),
   actions: z.array(WorkFlowActionButtonSchema),
   escalations: z.array(EscalationSchema).optional().default([]),
@@ -131,8 +132,6 @@ export const WorkflowConfigBaseSchema = z
         message: `Initial state "${stateMachine.initialState}" is not defined in states`,
       });
     }
-
-
 
     // ── finalStates must exist in states ───────────────────────────────────
     stateMachine.finalStates.forEach((fs, i) => {
