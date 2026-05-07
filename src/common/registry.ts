@@ -122,7 +122,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Awaiting Payment",
         state: "AWAITING_PAYMENT",
-        progress: 0,
+        progress: 0, // step 0/7
         actions: [
           {
             icon: "💳",
@@ -138,7 +138,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Pending Review",
         state: "PENDING_REVIEW",
-        progress: 25,
+        progress: 14.3, // step 1/7
         actions: [
           {
             icon: "✅",
@@ -160,7 +160,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Reviewed",
         state: "REVIEWED",
-        progress: 37.5,
+        progress: 28.6, // step 2/7
         actions: [
           {
             icon: "⚙️",
@@ -182,7 +182,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Production",
         state: "IN_PRODUCTION",
-        progress: 50,
+        progress: 42.9, // step 3/7
         actions: [
           {
             icon: "📋",
@@ -204,7 +204,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Ready for Collection",
         state: "READY_FOR_COLLECTION",
-        progress: 62.5,
+        progress: 57.1, // step 4/7
         actions: [
           {
             icon: "📤",
@@ -226,7 +226,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Collected",
         state: "COLLECTED",
-        progress: 75,
+        progress: 71.4, // step 5/7
         actions: [
           {
             icon: "🚚",
@@ -242,7 +242,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Transit",
         state: "IN_TRANSIT",
-        progress: 87.5,
+        progress: 85.7, // step 6/7
         actions: [
           {
             icon: "🎉",
@@ -258,7 +258,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        progress: 100,
+        progress: 100, // step 7/7
         actions: [],
         description: "Order successfully delivered.",
         requiredRoles: [],
@@ -268,7 +268,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Refund in Progress",
         state: "REFUND_IN_PROGRESS",
-        progress: 0,
+        progress: 0, // off happy-path
         actions: [
           {
             icon: "💸",
@@ -308,7 +308,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       {
         label: "Refunded",
         state: "REFUNDED",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         actions: [],
         description: "Order has been refunded.",
         requiredRoles: ["admin"],
@@ -480,7 +480,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Awaiting Payment",
         state: "AWAITING_PAYMENT",
-        progress: 0,
+        progress: 0, // step 0/7
         actions: [
           {
             icon: "💳",
@@ -496,7 +496,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Pending Review",
         state: "PENDING_REVIEW",
-        progress: 25,
+        progress: 14.3, // step 1/7
         actions: [
           {
             icon: "✅",
@@ -511,7 +511,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       },
       {
         label: "Reviewed",
-        progress: 37.5,
+        progress: 28.6, // step 2/7
         state: "REVIEWED",
         actions: [
           {
@@ -528,7 +528,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Production",
         state: "IN_PRODUCTION",
-        progress: 50,
+        progress: 42.9, // step 3/7
         actions: [
           {
             icon: "📋",
@@ -544,7 +544,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Ready for Collection",
         state: "READY_FOR_COLLECTION",
-        progress: 62.5,
+        progress: 57.1, // step 4/7
         actions: [
           {
             icon: "📤",
@@ -566,7 +566,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Collected",
         state: "COLLECTED",
-        progress: 75,
+        progress: 71.4, // step 5/7
         actions: [
           {
             icon: "🚚",
@@ -582,7 +582,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "In Transit",
         state: "IN_TRANSIT",
-        progress: 87.5,
+        progress: 85.7, // step 6/7
         actions: [
           {
             icon: "🎉",
@@ -598,7 +598,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       {
         label: "Delivered",
         state: "DELIVERED",
-        progress: 100,
+        progress: 100, // step 7/7
         actions: [],
         description: "Order successfully delivered.",
         requiredRoles: [],
@@ -723,7 +723,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "DRAFT",
         label: "Draft",
-        progress: 0,
+        progress: 0, // step 0/3
         description: "Quote is being prepared",
         requiredRoles: ["admin"],
         actions: [
@@ -751,7 +751,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "SENT",
         label: "Sent",
-        progress: 30,
+        progress: 33.3, // step 1/3
         description: "Quote sent to customer",
         requiredRoles: ["admin", "customer"],
         actions: [
@@ -793,7 +793,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "ACCEPTED",
         label: "Accepted",
-        progress: 99,
+        progress: 66.7, // step 2/3
         description: "Quote approved by customer",
         requiredRoles: ["admin"],
         actions: [
@@ -809,7 +809,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "REJECTED",
         label: "Rejected",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         description: "Quote rejected by customer",
         requiredRoles: ["admin"],
         actions: [],
@@ -818,7 +818,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "EXPIRED",
         label: "Expired",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         description: "Quote validity expired",
         requiredRoles: ["admin"],
         actions: [],
@@ -827,7 +827,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         state: "CONVERTED",
         label: "Converted",
-        progress: 100,
+        progress: 100, // step 3/3
         description: "Quote converted to order",
         requiredRoles: ["admin"],
         actions: [],
@@ -879,7 +879,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     states: [
       {
         state: "ARTWORK_PENDING",
-        progress: 30,
+        progress: 0, // step 0/2
         label: "Artwork Pending",
         description: "Waiting for designer to upload initial artwork.",
         requiredRoles: ["artwork-designer", "admin"],
@@ -912,7 +912,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
       {
         state: "ARTWORK_IN_REVIEW",
         label: "In Review",
-        progress: 40,
+        progress: 50, // step 1/2 (parallel tier with IN_REVISION)
         description: "Admin is performing final review of the artwork.",
         requiredRoles: ["admin", "artwork-designer"],
         actions: [
@@ -936,7 +936,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
       {
         state: "ARTWORK_IN_REVISION",
         label: "In Revision",
-        progress: 40,
+        progress: 50, // step 1/2 (parallel tier with IN_REVIEW)
         description: "Designer is updating artwork based on revision request.",
         requiredRoles: ["admin", "artwork-designer"],
         actions: [
@@ -952,7 +952,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
 
       {
         state: "ARTWORK_APPROVED",
-        progress: 100,
+        progress: 100, // step 2/2
         label: "Artwork Approved",
         description: "Artwork has been fully approved.",
         requiredRoles: [],
@@ -1005,6 +1005,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     escalations: [],
   },
 });
+
 export const REFUND_FLOW_CONFIG = defineWorkflow({
   definitionName: "refund-lifecycle",
   resourceType: "invoice",
@@ -1047,7 +1048,7 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
       {
         label: "Refund in Progress",
         state: "REFUND_IN_PROGRESS",
-        progress: 10,
+        progress: 50, // step 1/2 (only intermediate state)
         actions: [
           {
             icon: "💸",
@@ -1070,7 +1071,7 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         label: "Refunded",
         state: "REFUNDED",
         actions: [],
-        progress: 100,
+        progress: 100, // terminal — refund completed
         description: "Refund has been successfully completed.",
         requiredRoles: [],
         escalations: [],
@@ -1078,7 +1079,7 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
       {
         label: "Paid",
         state: "PAID",
-        progress: 100,
+        progress: 100, // terminal — refund cancelled, fully resolved
         actions: [],
         description: "Refund was cancelled and invoice is back to paid status.",
         requiredRoles: [],
@@ -1153,7 +1154,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "AWAITING_ACCEPTANCE",
         label: "Awaiting Acceptance",
-        progress: 0,
+        progress: 0, // step 0/2
         description: "Job has been created and is pending assignee acceptance.",
         requiredRoles: [
           "vendor",
@@ -1211,7 +1212,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "ACCEPTED",
         label: "Accepted",
-        progress: 30,
+        progress: 50, // step 1/2
         description: "Job has been accepted and is underway.",
         requiredRoles: [
           "vendor",
@@ -1239,7 +1240,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "REJECTED",
         label: "Rejected",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         description: "Job was rejected by the assignee.",
         requiredRoles: [
           "admin",
@@ -1253,7 +1254,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "EXPIRED",
         label: "Expired",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         description: "Job was not accepted within the required timeframe.",
         requiredRoles: ["system"],
         actions: [],
@@ -1262,7 +1263,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "COMPLETED",
         label: "Completed",
-        progress: 99,
+        progress: 100, // step 2/2
         description: "Job has been successfully completed.",
         requiredRoles: [],
         actions: [],
@@ -1271,7 +1272,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       {
         state: "CANCELLED",
         label: "Cancelled",
-        progress: 0,
+        progress: 0, // off happy-path terminal
         description: "Job was cancelled.",
         requiredRoles: ["admin"],
         actions: [],
@@ -1340,7 +1341,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
     states: [
       {
         state: "PENDING",
-        progress: 30,
+        progress: 0, // step 0/3
         label: "Pending",
         description: "Job created, awaiting production start.",
         requiredRoles: ["admin"],
@@ -1357,7 +1358,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       {
         state: "IN_PRODUCTION",
         label: "In Production",
-        progress: 40,
+        progress: 33.3, // step 1/3
         description: "Job is currently in production.",
         requiredRoles: ["vendor", "admin"],
         actions: [
@@ -1373,7 +1374,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       {
         state: "READY_FOR_COLLECTION",
         label: "Ready for Collection",
-        progress: 40,
+        progress: 66.7, // step 2/3
         description: "Job finished and ready for pickup.",
         requiredRoles: ["vendor", "admin"],
         actions: [
@@ -1388,7 +1389,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       },
       {
         state: "COMPLETED",
-        progress: 100,
+        progress: 100, // step 3/3
         label: "Completed",
         description: "Job has been fully completed.",
         requiredRoles: [],
