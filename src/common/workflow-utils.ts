@@ -4,6 +4,7 @@ import {
   WorkflowConfigSchema,
   WorkflowDto,
   WorkFlowStep,
+  WorkflowHistory,
 } from "./workflow-schema";
 
 /**
@@ -42,6 +43,7 @@ export function getAllPaths(
 export function resolveDisplayPath(
   config: WorkflowConfig,
   currentStateId: string,
+  history?: WorkflowHistory,
 ): string[] {
   const { initialState, finalStates, transitions } = config.stateMachine;
 
@@ -57,7 +59,38 @@ export function resolveDisplayPath(
 
   if (allPaths.length === 0) return [initialState];
 
-  // Sort descending by length so index-0 is always the longest
+  // 1. If history is provided, find the path that matches the actual traversed edges
+  if (history && history.length > 0) {
+    const traversedEdges = new Set(
+      history
+        .filter((h) => h.fromStep !== null)
+        .map((h) => `${h.fromStep}::${h.toStep}`),
+    );
+
+    const scoredPaths = allPaths.map((path) => {
+      let score = 0;
+      for (let i = 0; i < path.length - 1; i++) {
+        if (traversedEdges.has(`${path[i]}::${path[i + 1]}`)) {
+          score++;
+        }
+      }
+      return { path, score };
+    });
+
+    // Sort by score DESC, then by length DESC as a tie-breaker
+    scoredPaths.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.path.length - a.path.length;
+    });
+
+    const bestMatch = scoredPaths.find((p) => p.path.includes(currentStateId));
+    // Only return if we actually found a path with some traversal history
+    if (bestMatch && bestMatch.score > 0) {
+      return bestMatch.path;
+    }
+  }
+
+  // 2. Fallback: Sort descending by length so index-0 is always the longest
   allPaths.sort((a, b) => b.length - a.length);
 
   const longestPath = allPaths[0];
@@ -69,6 +102,7 @@ export function resolveDisplayPath(
   const fallback = allPaths.find((p) => p.includes(currentStateId));
   return fallback ?? longestPath;
 }
+
 
 export function getReachableStates<E extends WorkflowConfig>(
   config: E,
