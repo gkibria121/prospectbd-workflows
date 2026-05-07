@@ -120,8 +120,8 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
   stateMachine: {
     states: [
       {
-        label: "Unpaid",
-        state: "UNPAID",
+        label: "Awaiting Payment",
+        state: "AWAITING_PAYMENT",
         actions: [
           {
             icon: "💳",
@@ -305,16 +305,16 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         escalations: [],
       },
     ],
-    initialState: "UNPAID",
+    initialState: "AWAITING_PAYMENT",
     finalStates: ["REFUNDED", "DELIVERED"],
     transitions: [
       {
         fromState: "",
         eventId: "CREATED",
-        toState: "UNPAID",
+        toState: "AWAITING_PAYMENT",
       },
       {
-        fromState: "UNPAID",
+        fromState: "AWAITING_PAYMENT",
         eventId: "PAID_CONFIRMED",
         toState: "PENDING_REVIEW",
       },
@@ -404,6 +404,11 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
 
   events: [
     {
+      icon: "📦",
+      name: "Create Order",
+      eventId: "CREATED",
+    },
+    {
       icon: "💳",
       name: "Pay & Confirm",
       eventId: "PAID_CONFIRMED",
@@ -462,6 +467,21 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
   ],
   stateMachine: {
     states: [
+      {
+        label: "Awaiting Payment",
+        state: "AWAITING_PAYMENT",
+        actions: [
+          {
+            icon: "💳",
+            label: "Pay & Confirm",
+            eventId: "PAID_CONFIRMED",
+            variant: "bluePrimary",
+          },
+        ],
+        description: "Order created but not paid yet.",
+        requiredRoles: ["customer", "admin"],
+        escalations: [],
+      },
       {
         label: "Pending Review",
         state: "PENDING_REVIEW",
@@ -567,11 +587,16 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
         escalations: [],
       },
     ],
-    initialState: "PENDING_REVIEW",
+    initialState: "AWAITING_PAYMENT",
     finalStates: ["DELIVERED"],
     transitions: [
       {
         fromState: "",
+        eventId: "CREATED",
+        toState: "AWAITING_PAYMENT",
+      },
+      {
+        fromState: "AWAITING_PAYMENT",
         eventId: "PAID_CONFIRMED",
         toState: "PENDING_REVIEW",
       },
