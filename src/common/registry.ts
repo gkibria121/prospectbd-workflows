@@ -867,7 +867,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
 
   events: [
     { eventId: "DRAFT_CREATED", name: "Create Run", icon: "📝" },
-    { eventId: "ARTWORK_UPLOADED", name: "Upload Artwork", icon: "📤" },
+    { eventId: "ARTWORK_UPLOADED", name: "Artwork Uploaded", icon: "📤" },
     { eventId: "REVISION_REQUESTED", name: "Request Revision", icon: "✏️" },
     { eventId: "ARTWORK_APPROVED", name: "Approve Artwork", icon: "✅" },
   ],
@@ -886,24 +886,21 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
         actions: [
           {
             eventId: "ARTWORK_UPLOADED",
-            label: "Upload Artwork",
+            label: "Artwork Uploaded",
             icon: "📤",
             variant: "bluePrimary",
-            requiredRoles: ["artwork-designer", "admin"],
           },
           {
             eventId: "ARTWORK_APPROVED",
             label: "Fast-track Approval",
             icon: "✅",
             variant: "greenSuccess",
-            requiredRoles: ["artwork-designer", "admin"],
           },
           {
             eventId: "REVISION_REQUESTED",
             label: "Pre-emptive Revision",
             icon: "✏️",
             variant: "graySecondary",
-            requiredRoles: ["admin"],
           },
         ],
         escalations: [],
