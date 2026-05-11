@@ -1480,7 +1480,7 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
         progress: 10,
         label: "Pending",
         description: "Delivery job created, awaiting collection.",
-        requiredRoles: ["admin"],
+        requiredRoles: ["admin", "delivery-person"],
         actions: [
           {
             eventId: "COLLECTED",
