@@ -954,7 +954,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
         label: "Received",
         progress: 60,
         description: "Artwork has been received and is awaiting review.",
-        requiredRoles: ["admin"],
+        requiredRoles: ["artwork-designer", "admin"],
         actions: [
           {
             eventId: "ARTWORK_APPROVED",
