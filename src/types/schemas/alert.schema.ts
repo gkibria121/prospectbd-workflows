@@ -43,7 +43,9 @@ const AlertRuleTemplateBaseSchema = z.object({
     .optional(),
 });
 
-export const AlertRuleTemplateSchema = AlertRuleTemplateBaseSchema.superRefine(
+export const AlertRuleTemplateSchema = AlertRuleTemplateBaseSchema;
+
+export const AlertRuleSchema = AlertRuleTemplateBaseSchema.superRefine(
   (data, ctx) => {
     const templateKeys = [...data.template.matchAll(/\{(\w+)\}/g)].map(
       (m) => m[1],
@@ -66,12 +68,11 @@ export const AlertRuleTemplateSchema = AlertRuleTemplateBaseSchema.superRefine(
 );
 
 export const AlertRuleTemplateDefineSchema = AlertRuleTemplateBaseSchema.omit({
-  createdAt: true,
-  isActive: true,
   payload: true,
 });
 
 export type AlertRuleTemplate = z.infer<typeof AlertRuleTemplateSchema>;
+export type AlertRule = z.infer<typeof AlertRuleSchema>;
 export type AlertRuleTemplateDefine = z.infer<
   typeof AlertRuleTemplateDefineSchema
 >;
@@ -168,10 +169,7 @@ export type AlertNotification = z.infer<typeof AlertNotificationSchema>;
 
 // ─── API Request Schemas ─────────────────────────────────────────────────────
 
-export const CreateAlertRuleTemplateSchema = AlertRuleTemplateBaseSchema.omit({
-  isActive: true,
-  createdAt: true,
-});
+export const CreateAlertRuleTemplateSchema = AlertRuleTemplateBaseSchema;
 export type CreateAlertRuleTemplate = z.infer<
   typeof CreateAlertRuleTemplateSchema
 >;
