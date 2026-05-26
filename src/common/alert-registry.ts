@@ -1,5 +1,7 @@
+import { z } from "zod";
 import {
   AlertRuleSchema,
+  AppResourceSchema,
   type AlertRule,
 } from "../types";
 
@@ -28,7 +30,7 @@ function defineAlertRule<const T extends AlertRule>(config: T): T {
 export const ORDER_BLOCKED_ALERT = defineAlertRule({
   id: "rule-1",
   name: "Order Blocked SLA Alert",
-  eventTrigger: "Order Blocked",
+  eventTrigger: "order-blocked",
   severity: "CRITICAL",
   channels: { email: true, sms: true, push: true, slack: true },
   roles: ["admin"],
@@ -37,13 +39,18 @@ export const ORDER_BLOCKED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-10T08:00:00.000Z",
   deduplicate: true,
-  simulationPayload: { orderId: "DNP-6671", reason: "Artwork Quality Verification Failed" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    orderId: z.string(),
+    reason: z.string(),
+  }),
 });
 
 export const MISSING_ARTWORK_ALERT = defineAlertRule({
   id: "rule-2",
   name: "Missing Artwork Allocation",
-  eventTrigger: "Missing Artwork",
+  eventTrigger: "missing-artwork",
   severity: "WARNING",
   channels: { email: true, sms: false, push: true, slack: true },
   roles: ["admin", "artwork-designer"],
@@ -52,13 +59,18 @@ export const MISSING_ARTWORK_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-12T10:00:00.000Z",
   deduplicate: true,
-  simulationPayload: { orderId: "DNP-1082", timeElapsed: "60" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    orderId: z.string(),
+    timeElapsed: z.string(),
+  }),
 });
 
 export const ARTWORK_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   id: "rule-3",
   name: "Artwork Job Not Accepted Escalation",
-  eventTrigger: "Artwork Job Not Accepted",
+  eventTrigger: "artwork-job-not-accepted",
   severity: "WARNING",
   channels: { email: true, sms: false, push: false, slack: true },
   roles: ["artwork-designer"],
@@ -67,13 +79,19 @@ export const ARTWORK_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-13T14:30:00.000Z",
   deduplicate: true,
-  simulationPayload: { jobId: "ART-5512", orderId: "DNP-1082", timeLimit: "30" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    orderId: z.string(),
+    timeLimit: z.string(),
+  }),
 });
 
 export const MISSING_PRODUCTION_ALERT = defineAlertRule({
   id: "rule-4",
   name: "Missing Production Job Dispatcher",
-  eventTrigger: "Missing Production",
+  eventTrigger: "missing-production",
   severity: "WARNING",
   channels: { email: true, sms: false, push: true, slack: false },
   roles: ["admin"],
@@ -82,13 +100,18 @@ export const MISSING_PRODUCTION_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-14T09:15:00.000Z",
   deduplicate: true,
-  simulationPayload: { orderId: "DNP-3044", timeElapsed: "45" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    orderId: z.string(),
+    timeElapsed: z.string(),
+  }),
 });
 
 export const PRODUCTION_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   id: "rule-5",
   name: "Production Job Not Accepted Pager",
-  eventTrigger: "Production Job Not Accepted",
+  eventTrigger: "production-job-not-accepted",
   severity: "CRITICAL",
   channels: { email: false, sms: true, push: true, slack: true },
   roles: ["admin"],
@@ -97,13 +120,19 @@ export const PRODUCTION_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-15T11:45:00.000Z",
   deduplicate: true,
-  simulationPayload: { jobId: "PRD-8890", orderId: "DNP-3044", timeLimit: "20" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    orderId: z.string(),
+    timeLimit: z.string(),
+  }),
 });
 
 export const MISSING_DELIVERY_ALERT = defineAlertRule({
   id: "rule-6",
   name: "Missing Delivery Dispatcher",
-  eventTrigger: "Missing Delivery",
+  eventTrigger: "missing-delivery",
   severity: "WARNING",
   channels: { email: true, sms: false, push: false, slack: true },
   roles: ["admin", "delivery-person"],
@@ -112,13 +141,18 @@ export const MISSING_DELIVERY_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T16:20:00.000Z",
   deduplicate: true,
-  simulationPayload: { orderId: "DNP-9912", timeElapsed: "40" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    orderId: z.string(),
+    timeElapsed: z.string(),
+  }),
 });
 
 export const DELIVERY_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   id: "rule-7",
   name: "Delivery Job Not Accepted Warning",
-  eventTrigger: "Delivery Job Not Accepted",
+  eventTrigger: "delivery-job-not-accepted",
   severity: "WARNING",
   channels: { email: false, sms: true, push: true, slack: false },
   roles: ["admin", "delivery-person"],
@@ -127,13 +161,19 @@ export const DELIVERY_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T18:00:00.000Z",
   deduplicate: true,
-  simulationPayload: { jobId: "DLV-2210", orderId: "DNP-9912", timeLimit: "15" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    orderId: z.string(),
+    timeLimit: z.string(),
+  }),
 });
 
 export const ARTWORK_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   id: "rule-8-art",
   name: "Artwork Job Expired/Rejected Alert",
-  eventTrigger: "Artwork Job Expired Rejected",
+  eventTrigger: "artwork-job-expired-rejected",
   severity: "CRITICAL",
   channels: { email: true, sms: true, push: true, slack: true },
   roles: ["admin", "artwork-designer"],
@@ -142,18 +182,20 @@ export const ARTWORK_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:30:00.000Z",
   deduplicate: false,
-  simulationPayload: {
-    jobId: "ART-9011",
-    orderId: "DNP-5509",
-    action: "REJECTED",
-    reason: "Proof rejected by customer due to color mismatch",
-  },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    orderId: z.string(),
+    action: z.string(),
+    reason: z.string(),
+  }),
 });
 
 export const PRODUCTION_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   id: "rule-8-prd",
   name: "Production Job Expired/Rejected Alert",
-  eventTrigger: "Production Job Expired Rejected",
+  eventTrigger: "production-job-expired-rejected",
   severity: "CRITICAL",
   channels: { email: true, sms: true, push: true, slack: true },
   roles: ["admin"],
@@ -162,19 +204,21 @@ export const PRODUCTION_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:35:00.000Z",
   deduplicate: false,
-  simulationPayload: {
-    jobId: "PRD-1092",
-    jobType: "Banner Binding",
-    orderId: "DNP-4011",
-    action: "EXPIRED",
-    reason: "Station timeout without response",
-  },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    jobType: z.string(),
+    orderId: z.string(),
+    action: z.string(),
+    reason: z.string(),
+  }),
 });
 
 export const DELIVERY_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   id: "rule-8-dlv",
   name: "Delivery Job Expired/Rejected Alert",
-  eventTrigger: "Delivery Job Expired Rejected",
+  eventTrigger: "delivery-job-expired-rejected",
   severity: "CRITICAL",
   channels: { email: true, sms: true, push: true, slack: true },
   roles: ["admin", "delivery-person"],
@@ -183,18 +227,20 @@ export const DELIVERY_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:40:00.000Z",
   deduplicate: false,
-  simulationPayload: {
-    jobId: "DLV-3044",
-    orderId: "DNP-7712",
-    action: "REJECTED",
-    reason: "Driver vehicle breakdown",
-  },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    jobId: z.string(),
+    orderId: z.string(),
+    action: z.string(),
+    reason: z.string(),
+  }),
 });
 
 export const DELIVERY_OVERDUE_ALERT = defineAlertRule({
   id: "rule-9",
   name: "Critical Delivery Delay Tracker",
-  eventTrigger: "Delivery Overdue",
+  eventTrigger: "delivery-overdue",
   severity: "CRITICAL",
   channels: { email: true, sms: true, push: true, slack: false },
   roles: ["admin", "delivery-person"],
@@ -203,13 +249,19 @@ export const DELIVERY_OVERDUE_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T08:00:00.000Z",
   deduplicate: true,
-  simulationPayload: { orderId: "DNP-8924", driverName: "Sarah Connor", expectedTime: "12:15 PM" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    orderId: z.string(),
+    driverName: z.string(),
+    expectedTime: z.string(),
+  }),
 });
 
 export const DB_MIGRATION_CLEAR_ALERT = defineAlertRule({
   id: "rule-10-success",
   name: "DB Migration Clear",
-  eventTrigger: "Migration Success",
+  eventTrigger: "migration-success",
   severity: "SUCCESS",
   channels: { email: true, sms: false, push: true, slack: true },
   roles: ["admin"],
@@ -218,13 +270,18 @@ export const DB_MIGRATION_CLEAR_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T09:00:00.000Z",
   deduplicate: false,
-  simulationPayload: { version: "v2.4.2", nodeCount: "16" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    version: z.string(),
+    nodeCount: z.string(),
+  }),
 });
 
 export const DIAGNOSTIC_HEARTBEAT_ALERT = defineAlertRule({
   id: "rule-11-debug",
   name: "Diagnostic worker heartbeat",
-  eventTrigger: "Heartbeat Ping",
+  eventTrigger: "heartbeat-ping",
   severity: "DEBUG",
   channels: { email: false, sms: false, push: false, slack: true },
   roles: ["admin"],
@@ -233,7 +290,14 @@ export const DIAGNOSTIC_HEARTBEAT_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T09:10:00.000Z",
   deduplicate: true,
-  simulationPayload: { nodeId: "api-gateway-03", status: "HEALTHY", ms: "8", cpu: "14" },
+  payload: z.object({
+    resourceType: AppResourceSchema,
+    resourceId: z.string(),
+    nodeId: z.string(),
+    status: z.string(),
+    ms: z.string(),
+    cpu: z.string(),
+  }),
 });
 
 // ─── Registry ────────────────────────────────────────────────────────────────

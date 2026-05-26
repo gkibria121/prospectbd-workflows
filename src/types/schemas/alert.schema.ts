@@ -33,7 +33,7 @@ export const AlertRuleSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.string(),
   deduplicate: z.boolean(),
-  simulationPayload: z.record(z.string(), z.any()).optional(),
+  payload: z.any().optional(),
 });
 export type AlertRule = z.infer<typeof AlertRuleSchema>;
 
