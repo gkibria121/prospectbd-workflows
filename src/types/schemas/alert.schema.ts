@@ -33,17 +33,9 @@ export const AlertRuleSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.string(),
   deduplicate: z.boolean(),
+  simulationPayload: z.record(z.string(), z.any()).optional(),
 });
 export type AlertRule = z.infer<typeof AlertRuleSchema>;
-
-// ─── Alert Rule Event ────────────────────────────────────────────────────────
-
-export const AlertRuleEventSchema = z.object({
-  event: z.string(),
-  payload: z.record(z.string(), z.any()),
-  ruleName: z.string().optional(),
-});
-export type AlertRuleEvent = z.infer<typeof AlertRuleEventSchema>;
 
 // ─── Status ──────────────────────────────────────────────────────────────────
 
@@ -97,11 +89,6 @@ export const AlertLogSchema = z.object({
   isNotEscalted: z.boolean().optional(),
 });
 export type AlertLog = z.infer<typeof AlertLogSchema>;
-
-// ─── Backward compatibility aliases ──────────────────────────────────────────
-
-export const MockEventSchema = AlertRuleEventSchema;
-export type MockEvent = z.infer<typeof AlertRuleEventSchema>;
 
 // ─── Alert Metrics ───────────────────────────────────────────────────────────
 

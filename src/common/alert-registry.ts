@@ -1,8 +1,6 @@
 import {
   AlertRuleSchema,
-  AlertRuleEventSchema,
   type AlertRule,
-  type AlertRuleEvent,
 } from "../types";
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
@@ -39,6 +37,7 @@ export const ORDER_BLOCKED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-10T08:00:00.000Z",
   deduplicate: true,
+  simulationPayload: { orderId: "DNP-6671", reason: "Artwork Quality Verification Failed" },
 });
 
 export const MISSING_ARTWORK_ALERT = defineAlertRule({
@@ -53,6 +52,7 @@ export const MISSING_ARTWORK_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-12T10:00:00.000Z",
   deduplicate: true,
+  simulationPayload: { orderId: "DNP-1082", timeElapsed: "60" },
 });
 
 export const ARTWORK_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
@@ -67,6 +67,7 @@ export const ARTWORK_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-13T14:30:00.000Z",
   deduplicate: true,
+  simulationPayload: { jobId: "ART-5512", orderId: "DNP-1082", timeLimit: "30" },
 });
 
 export const MISSING_PRODUCTION_ALERT = defineAlertRule({
@@ -81,6 +82,7 @@ export const MISSING_PRODUCTION_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-14T09:15:00.000Z",
   deduplicate: true,
+  simulationPayload: { orderId: "DNP-3044", timeElapsed: "45" },
 });
 
 export const PRODUCTION_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
@@ -95,6 +97,7 @@ export const PRODUCTION_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-15T11:45:00.000Z",
   deduplicate: true,
+  simulationPayload: { jobId: "PRD-8890", orderId: "DNP-3044", timeLimit: "20" },
 });
 
 export const MISSING_DELIVERY_ALERT = defineAlertRule({
@@ -109,6 +112,7 @@ export const MISSING_DELIVERY_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T16:20:00.000Z",
   deduplicate: true,
+  simulationPayload: { orderId: "DNP-9912", timeElapsed: "40" },
 });
 
 export const DELIVERY_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
@@ -123,6 +127,7 @@ export const DELIVERY_JOB_NOT_ACCEPTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T18:00:00.000Z",
   deduplicate: true,
+  simulationPayload: { jobId: "DLV-2210", orderId: "DNP-9912", timeLimit: "15" },
 });
 
 export const ARTWORK_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
@@ -137,6 +142,12 @@ export const ARTWORK_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:30:00.000Z",
   deduplicate: false,
+  simulationPayload: {
+    jobId: "ART-9011",
+    orderId: "DNP-5509",
+    action: "REJECTED",
+    reason: "Proof rejected by customer due to color mismatch",
+  },
 });
 
 export const PRODUCTION_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
@@ -151,6 +162,13 @@ export const PRODUCTION_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:35:00.000Z",
   deduplicate: false,
+  simulationPayload: {
+    jobId: "PRD-1092",
+    jobType: "Banner Binding",
+    orderId: "DNP-4011",
+    action: "EXPIRED",
+    reason: "Station timeout without response",
+  },
 });
 
 export const DELIVERY_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
@@ -165,6 +183,12 @@ export const DELIVERY_JOB_EXPIRED_REJECTED_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-16T22:40:00.000Z",
   deduplicate: false,
+  simulationPayload: {
+    jobId: "DLV-3044",
+    orderId: "DNP-7712",
+    action: "REJECTED",
+    reason: "Driver vehicle breakdown",
+  },
 });
 
 export const DELIVERY_OVERDUE_ALERT = defineAlertRule({
@@ -179,6 +203,7 @@ export const DELIVERY_OVERDUE_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T08:00:00.000Z",
   deduplicate: true,
+  simulationPayload: { orderId: "DNP-8924", driverName: "Sarah Connor", expectedTime: "12:15 PM" },
 });
 
 export const DB_MIGRATION_CLEAR_ALERT = defineAlertRule({
@@ -193,6 +218,7 @@ export const DB_MIGRATION_CLEAR_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T09:00:00.000Z",
   deduplicate: false,
+  simulationPayload: { version: "v2.4.2", nodeCount: "16" },
 });
 
 export const DIAGNOSTIC_HEARTBEAT_ALERT = defineAlertRule({
@@ -207,6 +233,7 @@ export const DIAGNOSTIC_HEARTBEAT_ALERT = defineAlertRule({
   isActive: true,
   createdAt: "2026-05-17T09:10:00.000Z",
   deduplicate: true,
+  simulationPayload: { nodeId: "api-gateway-03", status: "HEALTHY", ms: "8", cpu: "14" },
 });
 
 // ─── Registry ────────────────────────────────────────────────────────────────
@@ -228,89 +255,6 @@ export const ALERT_RULES_REGISTRY: Record<string, AlertRule> = {
   [DIAGNOSTIC_HEARTBEAT_ALERT.id]: DIAGNOSTIC_HEARTBEAT_ALERT,
 };
 
-// ─── Event Definitions (simulation payloads) ─────────────────────────────────
-
-export const ALERT_EVENTS_REGISTRY: AlertRuleEvent[] = [
-  {
-    event: "Order Blocked",
-    payload: { orderId: "DNP-6671", reason: "Artwork Quality Verification Failed" },
-  },
-  {
-    event: "Missing Artwork",
-    payload: { orderId: "DNP-1082", timeElapsed: "60" },
-  },
-  {
-    event: "Artwork Job Not Accepted",
-    payload: { jobId: "ART-5512", orderId: "DNP-1082", timeLimit: "30" },
-  },
-  {
-    event: "Missing Production",
-    payload: { orderId: "DNP-3044", timeElapsed: "45" },
-  },
-  {
-    event: "Production Job Not Accepted",
-    payload: { jobId: "PRD-8890", orderId: "DNP-3044", timeLimit: "20" },
-  },
-  {
-    event: "Missing Delivery",
-    payload: { orderId: "DNP-9912", timeElapsed: "40" },
-  },
-  {
-    event: "Delivery Job Not Accepted",
-    payload: { jobId: "DLV-2210", orderId: "DNP-9912", timeLimit: "15" },
-  },
-  {
-    event: "Artwork Job Expired Rejected",
-    payload: {
-      jobId: "ART-9011",
-      orderId: "DNP-5509",
-      action: "REJECTED",
-      reason: "Proof rejected by customer due to color mismatch",
-    },
-  },
-  {
-    event: "Production Job Expired Rejected",
-    payload: {
-      jobId: "PRD-1092",
-      jobType: "Banner Binding",
-      orderId: "DNP-4011",
-      action: "EXPIRED",
-      reason: "Station timeout without response",
-    },
-  },
-  {
-    event: "Delivery Job Expired Rejected",
-    payload: {
-      jobId: "DLV-3044",
-      orderId: "DNP-7712",
-      action: "REJECTED",
-      reason: "Driver vehicle breakdown",
-    },
-  },
-  {
-    event: "Delivery Overdue",
-    payload: { orderId: "DNP-8924", driverName: "Sarah Connor", expectedTime: "12:15 PM" },
-  },
-  {
-    event: "Migration Success",
-    payload: { version: "v2.4.2", nodeCount: "16" },
-  },
-  {
-    event: "Heartbeat Ping",
-    payload: { nodeId: "api-gateway-03", status: "HEALTHY", ms: "8", cpu: "14" },
-  },
-];
-
-// Attach rule names to events for display purposes
-ALERT_EVENTS_REGISTRY.forEach((evt) => {
-  const matchingRule = Object.values(ALERT_RULES_REGISTRY).find(
-    (r) => r.eventTrigger === evt.event,
-  );
-  if (matchingRule) {
-    evt.ruleName = matchingRule.name;
-  }
-});
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Look up a single rule by its unique `id`. */
@@ -323,11 +267,6 @@ export function getAlertRulesByEvent(eventTrigger: string): AlertRule[] {
   return Object.values(ALERT_RULES_REGISTRY).filter(
     (r) => r.eventTrigger === eventTrigger && r.isActive,
   );
-}
-
-/** Return every registered simulation event. */
-export function getAlertRuleEvents(): AlertRuleEvent[] {
-  return ALERT_EVENTS_REGISTRY;
 }
 
 /** Return all registered alert rules. */
