@@ -22,30 +22,65 @@ export type NotificationChannels = z.infer<typeof NotificationChannelsSchema>;
 
 // ─── Alert Rule ──────────────────────────────────────────────────────────────
 
-export const AlertRuleSchema = z.object({
-  id: z.string(),
+const AlertRuleTemplateBaseSchema = z.object({
   name: z.string(),
-  eventTrigger: z.string(),
+  eventTrigger: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message:
+      "Must be kebab-case (lowercase letters, numbers, and hyphens only)",
+  }),
   severity: AlertSeveritySchema,
   channels: NotificationChannelsSchema,
   roles: z.array(UserRoleSchema),
   template: z.string(),
-  isActive: z.boolean(),
-  createdAt: z.string(),
   deduplicate: z.boolean(),
-  payload: z.any().optional(),
+  payload: z
+    .object({
+      resourceType: AppResourceSchema,
+      resourceId: z.string(),
+      resourceNo: z.string().optional().nullable(),
+    })
+    .and(z.record(z.string(), z.unknown()))
+    .optional(),
 });
-export type AlertRule = z.infer<typeof AlertRuleSchema>;
+
+export const AlertRuleTemplateSchema = AlertRuleTemplateBaseSchema.superRefine(
+  (data, ctx) => {
+    const templateKeys = [...data.template.matchAll(/\{(\w+)\}/g)].map(
+      (m) => m[1],
+    );
+
+    if (templateKeys.length === 0) return;
+
+    const payloadKeys = new Set(Object.keys(data.payload ?? {}));
+
+    for (const key of templateKeys) {
+      if (!payloadKeys.has(key)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["payload"],
+          message: `Template references key "{${key}}" but it is missing from payload`,
+        });
+      }
+    }
+  },
+);
+
+export const AlertRuleTemplateDefineSchema = AlertRuleTemplateBaseSchema.omit({
+  createdAt: true,
+  isActive: true,
+  payload: true,
+});
+
+export type AlertRuleTemplate = z.infer<typeof AlertRuleTemplateSchema>;
+export type AlertRuleTemplateDefine = z.infer<
+  typeof AlertRuleTemplateDefineSchema
+>;
 
 // ─── Status ──────────────────────────────────────────────────────────────────
 
 export const AlertStatusSchema = z.preprocess(
   (val) => (typeof val === "string" ? val.toLowerCase() : val),
-  z.enum([
-    "unresolved",
-    "acknowledged",
-    "resolved",
-  ])
+  z.enum(["unresolved", "acknowledged", "resolved"]),
 );
 export type StatusType = z.infer<typeof AlertStatusSchema>;
 
@@ -133,12 +168,13 @@ export type AlertNotification = z.infer<typeof AlertNotificationSchema>;
 
 // ─── API Request Schemas ─────────────────────────────────────────────────────
 
-export const CreateAlertRuleSchema = AlertRuleSchema.omit({
-  id: true,
+export const CreateAlertRuleTemplateSchema = AlertRuleTemplateBaseSchema.omit({
   isActive: true,
   createdAt: true,
 });
-export type CreateAlertRule = z.infer<typeof CreateAlertRuleSchema>;
+export type CreateAlertRuleTemplate = z.infer<
+  typeof CreateAlertRuleTemplateSchema
+>;
 
 export const UpdateAlertLogStatusSchema = z.object({
   status: AlertStatusSchema,
@@ -165,13 +201,15 @@ export type AlertSimulationResponse = z.infer<
   typeof AlertSimulationResponseSchema
 >;
 
-export const AlertRulesFilterSchema = z.object({
+export const AlertRuleTemplatesFilterSchema = z.object({
   searchQuery: z.string().optional(),
   severity: AlertSeveritySchema.or(z.literal("all")).optional(),
   role: z.string().optional(),
   users: z.string().optional(),
 });
-export type AlertRulesFilter = z.infer<typeof AlertRulesFilterSchema>;
+export type AlertRuleTemplatesFilter = z.infer<
+  typeof AlertRuleTemplatesFilterSchema
+>;
 
 export const AlertLogsFilterSchema = z.object({
   searchQuery: z.string().optional(),

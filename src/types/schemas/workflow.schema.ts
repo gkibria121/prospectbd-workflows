@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { AppResourceSchema, UserRoleSchema } from "./rbac.schema";
 import { ButtonVariantSchema } from "./button.schema";
+import { AlertRuleTemplateDefineSchema } from "./alert.schema";
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -90,6 +91,7 @@ export const WorkflowConfigBaseSchema = z
     events: z
       .array(WorkflowEventMetaSchema)
       .min(2, { message: "At two events are required" }),
+    alerts: z.array(AlertRuleTemplateDefineSchema).optional().default([]),
     stateMachine: WorkflowStateMachineSchema,
   })
   .superRefine((data, ctx) => {

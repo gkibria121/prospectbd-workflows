@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { defineWorkflow, defineWorkflowSystem } from "./workflow-utils";
+import * as Alerts from "./alert-registry";
 
 export const ORDER_FLOW_CONFIG = defineWorkflow({
   definitionName: "standard-order-flow",
@@ -116,6 +117,14 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         timestamp: z.string(),
       }),
     },
+  ],
+  alerts: [
+    Alerts.ORDER_BLOCKED_ALERT,
+    Alerts.MISSING_ARTWORK_ALERT,
+    Alerts.MISSING_PRODUCTION_ALERT,
+    Alerts.MISSING_DELIVERY_ALERT,
+    Alerts.DB_MIGRATION_CLEAR_ALERT,
+    Alerts.DIAGNOSTIC_HEARTBEAT_ALERT,
   ],
   stateMachine: {
     states: [
@@ -475,6 +484,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       }),
     },
   ],
+  alerts: [],
   stateMachine: {
     states: [
       {
@@ -716,6 +726,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       }),
     },
   ],
+  alerts: [],
   stateMachine: {
     initialState: "DRAFT",
     finalStates: ["REJECTED", "EXPIRED", "CONVERTED"],
@@ -871,6 +882,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     { eventId: "REVISION_REQUESTED", name: "Request Revision", icon: "✏️" },
     { eventId: "ARTWORK_APPROVED", name: "Approve Artwork", icon: "✅" },
   ],
+  alerts: [],
 
   stateMachine: {
     initialState: "ARTWORK_PENDING",
@@ -1081,6 +1093,7 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
       }),
     },
   ],
+  alerts: [],
   stateMachine: {
     states: [
       {
@@ -1183,7 +1196,14 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       icon: "🚫",
     },
   ],
-
+  alerts: [
+    Alerts.ARTWORK_JOB_NOT_ACCEPTED_ALERT,
+    Alerts.PRODUCTION_JOB_NOT_ACCEPTED_ALERT,
+    Alerts.DELIVERY_JOB_NOT_ACCEPTED_ALERT,
+    Alerts.ARTWORK_JOB_EXPIRED_REJECTED_ALERT,
+    Alerts.PRODUCTION_JOB_EXPIRED_REJECTED_ALERT,
+    Alerts.DELIVERY_JOB_EXPIRED_REJECTED_ALERT,
+  ],
   stateMachine: {
     initialState: "AWAITING_ACCEPTANCE",
     finalStates: ["REJECTED", "EXPIRED", "COMPLETED", "CANCELLED"],
@@ -1371,6 +1391,7 @@ export const PRODUCTION_FLOW_CONFIG = defineWorkflow({
       icon: "✅",
     },
   ],
+  alerts: [],
 
   stateMachine: {
     initialState: "PENDING",
@@ -1469,7 +1490,9 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
     { eventId: "SHIPPED", name: "Start Delivery", icon: "🚚" },
     { eventId: "DELIVERED", name: "Mark Delivered", icon: "🎉" },
   ],
-
+  alerts: [
+    Alerts.DELIVERY_OVERDUE_ALERT,
+  ],
   stateMachine: {
     initialState: "PENDING",
     finalStates: ["DELIVERED"],

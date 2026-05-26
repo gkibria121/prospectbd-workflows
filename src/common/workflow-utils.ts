@@ -277,6 +277,12 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     [K in keyof T]: Record<T[K]["stateMachine"]["states"][number]["state"], number>;
   };
 
+  // 4. Alert Registry & Methods
+  const allAlerts = Object.values(workflows).flatMap((flow) => flow.alerts || []);
+  const alertRegistry = Object.fromEntries(
+    allAlerts.map((alert) => [alert.name, alert])
+  );
+
   return {
     WORKFLOWS: workflows,
     WORKFLOW_REGISTRY: registry,
@@ -291,6 +297,11 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
       if (!schema) return { success: true, data };
       return schema.safeParse(data);
     },
+    ALERT_RULES_REGISTRY: alertRegistry,
+    getAlertRuleTemplateByName: (name: string) => alertRegistry[name],
+    getAlertRuleTemplatesByEvent: (eventTrigger: string) =>
+      allAlerts.filter((r: any) => r.eventTrigger === eventTrigger && r.isActive),
+    getAllAlertRuleTemplates: () => allAlerts,
   } as const;
 }
 
