@@ -239,7 +239,13 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Order approved and ready for production.",
         requiredRoles: ["admin", "vendor"],
-        escalations: [],
+        escalations: [
+          {
+            id: "missing-production",
+            after: { duration: 30, unit: "minutes" },
+            actionType: "send-sla",
+          },
+        ],
       },
       {
         label: "In Production",
