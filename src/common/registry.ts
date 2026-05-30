@@ -8,6 +8,17 @@ import { REFUND_FLOW_CONFIG } from "./definitions/refund-flow";
 import { PRODUCTION_FLOW_CONFIG } from "./definitions/production-flow";
 import { DELIVERY_FLOW_CONFIG } from "./definitions/delivery-flow";
 
+export {
+  ORDER_FLOW_CONFIG,
+  ORDER_ITEM_FLOW_CONFIG,
+  QUOTE_FLOW_CONFIG,
+  JOB_FLOW_CONFIG,
+  ARTWORK_FLOW_CONFIG,
+  REFUND_FLOW_CONFIG,
+  PRODUCTION_FLOW_CONFIG,
+  DELIVERY_FLOW_CONFIG,
+};
+
 export const WORKFLOW_SYSTEM = defineWorkflowSystem({
   order: ORDER_FLOW_CONFIG,
   "order-item": ORDER_ITEM_FLOW_CONFIG,

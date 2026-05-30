@@ -36,7 +36,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
   alerts: [
     {
       name: "Artwork Job Not Accepted Escalation",
-      eventTrigger: "artwork-job-not-accepted",
+      alertId: "artwork-job-not-accepted",
       severity: "WARNING",
       channels: { email: true, sms: false, push: false, slack: true },
       roles: ["artwork-designer"],
@@ -46,7 +46,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Production Job Not Accepted Pager",
-      eventTrigger: "production-job-not-accepted",
+      alertId: "production-job-not-accepted",
       severity: "CRITICAL",
       channels: { email: false, sms: true, push: true, slack: true },
       roles: ["admin"],
@@ -56,7 +56,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Delivery Job Not Accepted Warning",
-      eventTrigger: "delivery-job-not-accepted",
+      alertId: "delivery-job-not-accepted",
       severity: "WARNING",
       channels: { email: false, sms: true, push: true, slack: false },
       roles: ["admin", "delivery-person"],
@@ -66,7 +66,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Artwork Job Expired/Rejected Alert",
-      eventTrigger: "artwork-job-expired-rejected",
+      alertId: "artwork-job-expired-rejected",
       severity: "CRITICAL",
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin", "artwork-designer"],
@@ -76,7 +76,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Production Job Expired/Rejected Alert",
-      eventTrigger: "production-job-expired-rejected",
+      alertId: "production-job-expired-rejected",
       severity: "CRITICAL",
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin"],
@@ -86,7 +86,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Delivery Job Expired/Rejected Alert",
-      eventTrigger: "delivery-job-expired-rejected",
+      alertId: "delivery-job-expired-rejected",
       severity: "CRITICAL",
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin", "delivery-person"],

@@ -214,9 +214,19 @@ export function defineWorkflow<const T extends WorkflowConfig>(config: T) {
     [E in T["events"][number]["eventId"]]: `${T["definitionName"]}.${E}`;
   };
 
+  const alerts = Object.fromEntries(
+    (config.alerts || []).map((a) => [
+      a.alertId,
+      `${config.definitionName}.${a.alertId}` as const,
+    ]),
+  ) as {
+    [A in NonNullable<T["alerts"]>[number]["alertId"]]: `${T["definitionName"]}.${A}`;
+  };
+
   return {
     ...config,
     Events: events,
+    Alerts: alerts,
   } as const;
 }
 
@@ -242,6 +252,11 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     Object.entries(workflows).map(([key, flow]) => [key, flow.Events]),
   ) as {
     [K in keyof T]: T[K]["Events"];
+  };
+  const alertMap = Object.fromEntries(
+    Object.entries(workflows).map(([key, flow]) => [key, flow.Alerts]),
+  ) as {
+    [K in keyof T]: T[K]["Alerts"];
   };
   const stateMap = Object.fromEntries(
     Object.entries(workflows).map(([key, flow]) => [
@@ -306,10 +321,11 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
       if (!schema) return { success: true, data };
       return schema.safeParse(data);
     },
+    ALERT_MAP: alertMap,
     ALERT_RULES_REGISTRY: alertRegistry,
     getAlertRuleTemplateByName: (name: string) => alertRegistry[name],
-    getAlertRuleTemplatesByEvent: (eventTrigger: string) =>
-      allAlerts.filter((r: any) => r.eventTrigger === eventTrigger),
+    getAlertRuleTemplatesByEvent: (alertId: string) =>
+      allAlerts.filter((r: any) => r.alertId === alertId),
     getAllAlertRuleTemplates: () => allAlerts,
   } as const;
 }

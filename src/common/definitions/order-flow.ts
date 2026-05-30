@@ -120,7 +120,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
   alerts: [
     {
       name: "Order Blocked SLA Alert",
-      eventTrigger: "order-blocked",
+      alertId: "order-blocked",
       severity: "CRITICAL",
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin"],
@@ -130,7 +130,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Missing Artwork Allocation",
-      eventTrigger: "missing-artwork",
+      alertId: "missing-artwork",
       severity: "WARNING",
       channels: { email: true, sms: false, push: true, slack: true },
       roles: ["admin", "artwork-designer"],
@@ -140,7 +140,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Missing Production Job Dispatcher",
-      eventTrigger: "missing-production",
+      alertId: "missing-production",
       severity: "WARNING",
       channels: { email: true, sms: false, push: true, slack: false },
       roles: ["admin"],
@@ -150,7 +150,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Missing Delivery Dispatcher",
-      eventTrigger: "missing-delivery",
+      alertId: "missing-delivery",
       severity: "WARNING",
       channels: { email: true, sms: false, push: false, slack: true },
       roles: ["admin", "delivery-person"],
@@ -160,7 +160,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "DB Migration Clear",
-      eventTrigger: "migration-success",
+      alertId: "migration-success",
       severity: "SUCCESS",
       channels: { email: true, sms: false, push: true, slack: true },
       roles: ["admin"],
@@ -170,7 +170,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       name: "Diagnostic worker heartbeat",
-      eventTrigger: "heartbeat-ping",
+      alertId: "heartbeat-ping",
       severity: "DEBUG",
       channels: { email: false, sms: false, push: false, slack: true },
       roles: ["admin"],

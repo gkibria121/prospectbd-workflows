@@ -24,7 +24,7 @@ export type NotificationChannels = z.infer<typeof NotificationChannelsSchema>;
 
 const AlertRuleTemplateBaseSchema = z.object({
   name: z.string(),
-  eventTrigger: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+  alertId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message:
       "Must be kebab-case (lowercase letters, numbers, and hyphens only)",
   }),
@@ -98,7 +98,7 @@ export type AlertChannel = z.infer<typeof AlertChannelSchema>;
 export const AlertLogSchema = z.object({
   id: z.string(),
   ruleName: z.string(),
-  eventTrigger: z.string(),
+  alertId: z.string(),
   severity: AlertSeveritySchema,
   message: z.string(),
   status: AlertStatusSchema,
@@ -180,7 +180,7 @@ export const UpdateAlertLogStatusSchema = z.object({
 export type UpdateAlertLogStatus = z.infer<typeof UpdateAlertLogStatusSchema>;
 
 export const DispatchSimulatedEventSchema = z.object({
-  eventTrigger: z.string(),
+  alertId: z.string(),
   payload: z.record(z.string(), z.any()),
   recipientUsers: z.array(z.string()).optional(),
 });

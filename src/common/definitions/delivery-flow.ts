@@ -14,7 +14,7 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
   alerts: [
     {
       name: "Critical Delivery Delay Tracker",
-      eventTrigger: "delivery-overdue",
+      alertId: "delivery-overdue",
       severity: "CRITICAL",
       channels: { email: true, sms: true, push: true, slack: false },
       roles: ["admin", "delivery-person"],

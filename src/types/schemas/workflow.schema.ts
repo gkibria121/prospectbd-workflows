@@ -100,17 +100,17 @@ export const WorkflowConfigBaseSchema = z
     const stateIds = new Set(stateMachine.states.map((s) => s.state));
     const eventIds = new Set(events.map((e) => e.eventId));
 
-    // ── Duplicate alert eventTriggers ──────────────────────────────────────
+    // ── Duplicate alert ids ──────────────────────────────────────
     const seenAlertTriggers = new Set<string>();
     alerts.forEach((a, i) => {
-      if (seenAlertTriggers.has(a.eventTrigger)) {
+      if (seenAlertTriggers.has(a.alertId)) {
         ctx.addIssue({
           code: "custom",
-          path: ["alerts", i, "eventTrigger"],
-          message: `Duplicate alert eventTrigger: "${a.eventTrigger}"`,
+          path: ["alerts", i, "alertId"],
+          message: `Duplicate alert alertId: "${a.alertId}"`,
         });
       }
-      seenAlertTriggers.add(a.eventTrigger);
+      seenAlertTriggers.add(a.alertId);
     });
 
     // ── Duplicate state IDs ────────────────────────────────────────────────
