@@ -15,27 +15,25 @@ export const WorkFlowActionButtonSchema = z.object({
 
 export type WorkflowAction = z.infer<typeof WorkFlowActionButtonSchema>;
 
-export const EscalationActionSchema = z.discriminatedUnion("type", [
+export const EscalationSchema = z.discriminatedUnion("actionType", [
   z.object({
-    type: z.literal("raise-event"),
+    id: z.string(),
+    after: z.object({
+      duration: z.number(),
+      unit: z.enum(["minutes", "hours", "days"]),
+    }),
+    actionType: z.literal("raise-event"),
     eventId: z.string(),
   }),
   z.object({
-    type: z.literal("send-sla"),
-    notifyRoles: z.array(UserRoleSchema),
-    severity: z.enum(["warning", "critical"]).default("warning"),
+    id: z.string(), // acts as alertId
+    after: z.object({
+      duration: z.number(),
+      unit: z.enum(["minutes", "hours", "days"]),
+    }),
+    actionType: z.literal("send-sla"),
   }),
 ]);
-
-export const EscalationSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  after: z.object({
-    duration: z.number(),
-    unit: z.enum(["minutes", "hours", "days"]),
-  }),
-  action: EscalationActionSchema,
-});
 
 export type WorkflowEscalation = z.infer<typeof EscalationSchema>;
 
@@ -257,11 +255,11 @@ export const WorkflowConfigBaseSchema = z
         const isTriggeredByEscalation =
           (stateMachine.escalations ?? []).some(
             (e) =>
-              e.action.type === "raise-event" && e.action.eventId === t.eventId,
+              e.actionType === "raise-event" && e.eventId === t.eventId,
           ) ||
           (fromStep.escalations ?? []).some(
             (e) =>
-              e.action.type === "raise-event" && e.action.eventId === t.eventId,
+              e.actionType === "raise-event" && e.eventId === t.eventId,
           );
 
         if (!isTriggeredByEscalation) {
@@ -300,15 +298,14 @@ export const WorkflowConfigBaseSchema = z
     );
 
     globalEscalations.forEach((esc, ei) => {
-      const { action } = esc;
-      if (action.type === "raise-event") {
-        const eventId = action.eventId;
+      if (esc.actionType === "raise-event") {
+        const eventId = esc.eventId;
 
         const eventMeta = events.find((e) => e.eventId === eventId);
         if (!eventMeta) {
           ctx.addIssue({
             code: "custom",
-            path: ["stateMachine", "escalations", ei, "action", "eventId"],
+            path: ["stateMachine", "escalations", ei, "eventId"],
             message: `Global escalation eventId "${eventId}" is not defined in events`,
           });
         } else {
@@ -320,7 +317,7 @@ export const WorkflowConfigBaseSchema = z
             if (!hasTransition) {
               ctx.addIssue({
                 code: "custom",
-                path: ["stateMachine", "escalations", ei, "action", "eventId"],
+                path: ["stateMachine", "escalations", ei, "eventId"],
                 message: `Global escalation event "${eventId}" has no transition defined from state "${step.state}"`,
               });
             }
@@ -333,9 +330,8 @@ export const WorkflowConfigBaseSchema = z
     stateMachine.states.forEach((step, si) => {
       const stepEscalations = step.escalations ?? [];
       stepEscalations.forEach((esc, ei) => {
-        const { action } = esc;
-        if (action.type === "raise-event") {
-          const eventId = action.eventId;
+        if (esc.actionType === "raise-event") {
+        const eventId = esc.eventId;
           const eventMeta = events.find((e) => e.eventId === eventId);
           if (!eventMeta) {
             ctx.addIssue({
@@ -346,7 +342,6 @@ export const WorkflowConfigBaseSchema = z
                 si,
                 "escalations",
                 ei,
-                "action",
                 "eventId",
               ],
               message: `Escalation eventId "${eventId}" on state "${step.state}" is not defined in events`,
@@ -365,7 +360,6 @@ export const WorkflowConfigBaseSchema = z
                   si,
                   "escalations",
                   ei,
-                  "action",
                   "eventId",
                 ],
                 message: `Escalation event "${eventId}" on state "${step.state}" has no matching transition`,
@@ -411,12 +405,9 @@ export const TriggerEventPayloadSchema = z.object({
 
 export const EscalationAlertPayloadSchema = z.object({
   workflowId: WorkflowIdSchema,
-  escalationId: z.string(),
-  label: z.string(),
-  severity: z.enum(["warning", "critical"]),
+  alertId: z.string(),
   duration: z.number(),
   unit: z.enum(["minutes", "hours", "days"]),
-  notifyRoles: z.array(z.string()),
   firedAt: z.string().datetime(),
 });
 

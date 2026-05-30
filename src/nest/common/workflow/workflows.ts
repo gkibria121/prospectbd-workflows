@@ -240,10 +240,10 @@ async function handleEscalations(
 */
       state.triggeredEscalations.push(nextEscalation.id);
 
-      if (nextEscalation.action.type === "raise-event") {
+      if (nextEscalation.actionType === "raise-event") {
         applyTransition(config, state, {
           workflowId: config.workflowId!,
-          eventId: nextEscalation.action.eventId,
+          eventId: nextEscalation.eventId,
           data: {
             resourceType: config.resourceType,
             id: config.workflowId!, // Use full ID as it is now a UUID
@@ -252,17 +252,20 @@ async function handleEscalations(
           },
           userRoles: ["admin"], // System triggered
         });
-      } else if (nextEscalation.action.type === "send-sla") {
-        await sendEscalationAlert({
-          workflowId: config.workflowId!,
-          escalationId: nextEscalation.id,
-          label: nextEscalation.label,
-          notifyRoles: nextEscalation.action.notifyRoles as string[],
-          severity: nextEscalation.action.severity,
-          duration: nextEscalation.after.duration,
-          unit: nextEscalation.after.unit,
-          firedAt: new Date().toISOString(),
-        });
+      } else if (nextEscalation.actionType === "send-sla") {
+        const alertConfig = config.alerts?.find(
+          (a) => a.alertId === nextEscalation.id
+        );
+
+        if (alertConfig) {
+          await sendEscalationAlert({
+            workflowId: config.workflowId!,
+            alertId: nextEscalation.id,
+            duration: nextEscalation.after.duration,
+            unit: nextEscalation.after.unit,
+            firedAt: new Date().toISOString(),
+          });
+        }
         /*
         console.log(
           `[Workflow: ${config.definitionName}] SLA Alert sent for "${nextEscalation.id}". Continuing loop in state "${state.currentStateId}"...`,

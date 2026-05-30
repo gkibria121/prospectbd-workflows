@@ -105,6 +105,26 @@ function createTestConfig(
       { eventId: "complete", name: "Complete", icon: "✓" },
       { eventId: "expired", name: "Expired", icon: "⏰" },
     ],
+    alerts: [
+      {
+        alertId: "test-alert",
+        name: "Test Alert",
+        severity: "WARNING",
+        roles: ["admin"],
+        template: "Test SLA",
+        channels: { email: true, sms: false, push: false, slack: false },
+        deduplicate: false,
+      },
+      {
+        alertId: "early",
+        name: "Early Alert",
+        severity: "WARNING",
+        roles: ["admin"],
+        template: "Test SLA",
+        channels: { email: true, sms: false, push: false, slack: false },
+        deduplicate: false,
+      },
+    ],
     stateMachine: {
       initialState: "pending",
       finalStates: ["completed", "expired-state"],
@@ -389,9 +409,9 @@ describe("Temporal workflow()", () => {
         escalations: [
           {
             id: "esc-1",
-            label: "Auto Expire",
             after: { duration: 1, unit: "minutes" },
-            action: { type: "raise-event", eventId: "expired" },
+            actionType: "raise-event",
+            eventId: "expired",
           },
         ],
       },
@@ -410,14 +430,9 @@ describe("Temporal workflow()", () => {
     )!;
     pendingState.escalations = [
       {
-        id: "sla-1",
-        label: "SLA Warning",
+        id: "test-alert",
         after: { duration: 5, unit: "minutes" },
-        action: {
-          type: "send-sla",
-          notifyRoles: ["admin"],
-          severity: "warning",
-        },
+        actionType: "send-sla",
       },
     ];
 
@@ -427,8 +442,7 @@ describe("Temporal workflow()", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(mockSendEscalationAlert).toHaveBeenCalledWith(
       expect.objectContaining({
-        escalationId: "sla-1",
-        label: "SLA Warning",
+        alertId: "test-alert",
       }),
     );
 
@@ -487,9 +501,9 @@ describe("Temporal workflow()", () => {
         escalations: [
           {
             id: "global-1",
-            label: "Global Timeout",
             after: { duration: 10, unit: "minutes" },
-            action: { type: "raise-event", eventId: "expired" },
+            actionType: "raise-event",
+            eventId: "expired",
           },
         ],
       },
@@ -513,23 +527,13 @@ describe("Temporal workflow()", () => {
     pendingState.escalations = [
       {
         id: "late",
-        label: "Late",
         after: { duration: 10, unit: "minutes" },
-        action: {
-          type: "send-sla",
-          notifyRoles: ["admin"],
-          severity: "warning",
-        },
+        actionType: "send-sla",
       },
       {
         id: "early",
-        label: "Early",
         after: { duration: 1, unit: "minutes" },
-        action: {
-          type: "send-sla",
-          notifyRoles: ["admin"],
-          severity: "warning",
-        },
+        actionType: "send-sla",
       },
     ];
 
@@ -538,10 +542,10 @@ describe("Temporal workflow()", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(mockSendEscalationAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ escalationId: "early" }),
+      expect.objectContaining({ alertId: "early" }),
     );
     expect(mockSendEscalationAlert).not.toHaveBeenCalledWith(
-      expect.objectContaining({ escalationId: "late" }),
+      expect.objectContaining({ alertId: "late" }),
     );
   });
 
@@ -606,13 +610,8 @@ describe("Temporal workflow()", () => {
     pendingState.escalations = [
       {
         id: "pending-esc",
-        label: "Pending Escalation",
         after: { duration: 1, unit: "minutes" },
-        action: {
-          type: "send-sla",
-          notifyRoles: ["admin"],
-          severity: "warning",
-        },
+        actionType: "send-sla",
       },
     ];
 
@@ -648,9 +647,9 @@ describe("Temporal workflow()", () => {
         escalations: [
           {
             id: "global-timeout",
-            label: "Global Timeout",
             after: { duration: 10, unit: "minutes" },
-            action: { type: "raise-event", eventId: "expired" },
+            actionType: "raise-event",
+            eventId: "expired",
           },
         ],
       },
@@ -693,14 +692,9 @@ describe("Temporal workflow()", () => {
     )!;
     pendingState.escalations = [
       {
-        id: "sla-repeat",
-        label: "Repeating SLA",
+        id: "test-alert",
         after: { duration: 5, unit: "minutes" },
-        action: {
-          type: "send-sla",
-          notifyRoles: ["admin"],
-          severity: "warning",
-        },
+        actionType: "send-sla",
       },
     ];
 

@@ -341,9 +341,9 @@ describe("WorkflowConfigBaseSchema", () => {
       config.stateMachine.escalations = [
         {
           id: "esc1",
-          label: "Escalate",
           after: { duration: 1, unit: "hours" },
-          action: { type: "raise-event", eventId: "non-existent" },
+          actionType: "raise-event",
+            eventId: "non-existent",
         },
       ];
       const result = WorkflowConfigBaseSchema.safeParse(config);
@@ -364,9 +364,9 @@ describe("WorkflowConfigBaseSchema", () => {
       config.stateMachine.escalations = [
         {
           id: "esc1",
-          label: "Escalate",
           after: { duration: 1, unit: "hours" },
-          action: { type: "raise-event", eventId: "approve" },
+          actionType: "raise-event",
+            eventId: "approve",
         },
       ];
       // "draft" state does not have a transition for "approve"
@@ -388,9 +388,9 @@ describe("WorkflowConfigBaseSchema", () => {
       config.stateMachine.states[0].escalations = [
         {
           id: "esc1",
-          label: "Escalate",
           after: { duration: 1, unit: "hours" },
-          action: { type: "raise-event", eventId: "non-existent" },
+          actionType: "raise-event",
+            eventId: "non-existent",
         },
       ];
       const result = WorkflowConfigBaseSchema.safeParse(config);
@@ -411,9 +411,9 @@ describe("WorkflowConfigBaseSchema", () => {
       config.stateMachine.states[0].escalations = [
         {
           id: "esc1",
-          label: "Escalate",
           after: { duration: 1, unit: "hours" },
-          action: { type: "raise-event", eventId: "approve" },
+          actionType: "raise-event",
+            eventId: "approve",
         },
       ];
       // "draft" state does not have a transition for "approve"
