@@ -203,11 +203,6 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
     finalStates: ["DELIVERED"],
     transitions: [
       {
-        fromState: "",
-        eventId: "CREATED",
-        toState: "AWAITING_PAYMENT",
-      },
-      {
         fromState: "AWAITING_PAYMENT",
         eventId: "PAID_CONFIRMED",
         toState: "PENDING_REVIEW",

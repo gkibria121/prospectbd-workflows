@@ -61,7 +61,7 @@ describe("WorkflowConfigBaseSchema", () => {
         },
       ],
       transitions: [
-        { fromState: "", toState: "draft", eventId: "submit" },
+
         { fromState: "draft", toState: "review", eventId: "submit" },
         { fromState: "review", toState: "approved", eventId: "approve" },
         { fromState: "review", toState: "rejected", eventId: "reject" },

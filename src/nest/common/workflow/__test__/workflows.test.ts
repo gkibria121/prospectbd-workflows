@@ -177,7 +177,7 @@ function createTestConfig(
         },
       ],
       transitions: [
-        { fromState: "", toState: "pending", eventId: "create" },
+
         { fromState: "pending", toState: "confirmed", eventId: "confirm" },
         { fromState: "confirmed", toState: "completed", eventId: "complete" },
         { fromState: "pending", toState: "expired-state", eventId: "expired" },
@@ -259,21 +259,19 @@ describe("Temporal workflow()", () => {
     const result = await workflowPromise;
 
     expect(result.currentState?.state).toBe("completed");
-    expect(result.history).toHaveLength(3);
-    expect(result.history[0].toStep).toBe("pending");
-    expect(result.history[1].toStep).toBe("confirmed");
-    expect(result.history[2].toStep).toBe("completed");
+    expect(result.history).toHaveLength(2);
+    expect(result.history[0].toStep).toBe("confirmed");
+    expect(result.history[1].toStep).toBe("completed");
 
-    // Check publications (including initial)
-    // 1: create -> pending
-    // 2: confirm -> confirmed
-    // 3: complete -> completed
-    expect(mockPublishEvent).toHaveBeenCalledTimes(3);
+    // Check publications
+    // 1: confirm -> confirmed
+    // 2: complete -> completed
+    expect(mockPublishEvent).toHaveBeenCalledTimes(2);
     expect(mockPublishEvent).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        event: `${config.definitionName}.create`,
-        currentState: expect.objectContaining({ state: "pending" }),
+        event: `${config.definitionName}.confirm`,
+        currentState: expect.objectContaining({ state: "confirmed" }),
       }),
     );
   });
@@ -309,11 +307,11 @@ describe("Temporal workflow()", () => {
       approved: true,
     });
 
-    // Verify initial publish had the initial data
+    // Verify first publish had the initial data merged
     expect(mockPublishEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: `${config.definitionName}.create`,
-        data: expect.objectContaining({ meta: "test" }),
+        event: `${config.definitionName}.confirm`,
+        data: expect.objectContaining({ meta: "test", user: "alice" }),
       }),
     );
   });
@@ -442,7 +440,7 @@ describe("Temporal workflow()", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(mockSendEscalationAlert).toHaveBeenCalledWith(
       expect.objectContaining({
-        alertId: "test-alert",
+        alertRuleId: "test-alert",
       }),
     );
 
@@ -542,10 +540,10 @@ describe("Temporal workflow()", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(mockSendEscalationAlert).toHaveBeenCalledWith(
-      expect.objectContaining({ alertId: "early" }),
+      expect.objectContaining({ alertRuleId: "early" }),
     );
     expect(mockSendEscalationAlert).not.toHaveBeenCalledWith(
-      expect.objectContaining({ alertId: "late" }),
+      expect.objectContaining({ alertRuleId: "late" }),
     );
   });
 
@@ -577,24 +575,17 @@ describe("Temporal workflow()", () => {
 
     await workflowPromise;
 
-    // Check that publishEvent was called for initial + two transitions
-    expect(mockPublishEvent).toHaveBeenCalledTimes(3);
+    // Check that publishEvent was called for two transitions
+    expect(mockPublishEvent).toHaveBeenCalledTimes(2);
     expect(mockPublishEvent).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({
-        event: expect.stringContaining("create"),
-        currentState: expect.objectContaining({ state: "pending" }),
-      }),
-    );
-    expect(mockPublishEvent).toHaveBeenNthCalledWith(
-      2,
       expect.objectContaining({
         event: expect.stringContaining("confirm"),
         currentState: expect.objectContaining({ state: "confirmed" }),
       }),
     );
     expect(mockPublishEvent).toHaveBeenNthCalledWith(
-      3,
+      2,
       expect.objectContaining({
         event: expect.stringContaining("complete"),
         currentState: expect.objectContaining({ state: "completed" }),
@@ -681,8 +672,8 @@ describe("Temporal workflow()", () => {
     expect(result.history).toContainEqual(
       expect.objectContaining({ toStep: "expired-state" }),
     );
-    expect(result.history[0].toStep).toBe("pending");
-    expect(result.history[0].eventId).toBe(`${config.definitionName}.create`);
+    expect(result.history[0].toStep).toBe("confirmed");
+    expect(result.history[0].eventId).toBe(`${config.definitionName}.confirm`);
   });
 
   it("deduplicates triggered escalations so they don't fire twice in the same state", async () => {

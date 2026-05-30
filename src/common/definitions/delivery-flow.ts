@@ -88,7 +88,7 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-      { fromState: "", toState: "PENDING", eventId: "DRAFT_CREATED" },
+
       {
         fromState: "PENDING",
         toState: "COLLECTED_FROM_PRODUCTION",

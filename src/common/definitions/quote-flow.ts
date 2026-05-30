@@ -174,7 +174,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       },
     ],
     transitions: [
-      { fromState: "", toState: "DRAFT", eventId: "DRAFT_CREATED" },
+
       { fromState: "DRAFT", toState: "DRAFT", eventId: "EDITED" },
       { fromState: "DRAFT", toState: "ACCEPTED", eventId: "CUSTOMER_APPROVED" },
       { fromState: "DRAFT", toState: "SENT", eventId: "SENT_TO_CUSTOMER" },

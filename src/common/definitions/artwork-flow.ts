@@ -130,8 +130,7 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-      // Initial creation
-      { fromState: "", toState: "ARTWORK_PENDING", eventId: "DRAFT_CREATED" },
+
 
       // Normal path: Pending -> Received -> Review -> Approved
       {

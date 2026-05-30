@@ -86,11 +86,6 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
     finalStates: ["REFUNDED", "PAID"],
     transitions: [
       {
-        fromState: "",
-        eventId: "REFUND_INITIATED",
-        toState: "REFUND_IN_PROGRESS",
-      },
-      {
         fromState: "REFUND_IN_PROGRESS",
         eventId: "REFUND_COMPLETED",
         toState: "REFUNDED",

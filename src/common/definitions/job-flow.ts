@@ -227,8 +227,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-      // Initial creation
-      { fromState: "", toState: "AWAITING_ACCEPTANCE", eventId: "JOB_CREATED" },
+
 
       // From AWAITING_ACCEPTANCE
       {

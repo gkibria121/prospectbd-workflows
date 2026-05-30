@@ -286,30 +286,11 @@ export async function workflow(
 
   const startTime = new Date().toISOString();
 
-  // Find the initial transition (from "" to initialState)
-  const initialTransition = config.stateMachine.transitions.find(
-    (t) => t.fromState === "" && t.toState === initialState,
-  );
-
-  const initialEventId = initialTransition
-    ? `${config.definitionName}.${initialTransition.eventId}`
-    : null;
-
   const state: WorkflowState = {
     currentStateId: initialState,
-    lastEventId: initialEventId,
+    lastEventId: null,
     data: { ...initialData },
-    history: initialTransition
-      ? [
-          {
-            eventId: initialEventId!,
-            fromStep: null,
-            toStep: initialState,
-            data: initialData,
-            timestamp: startTime,
-          },
-        ]
-      : [],
+    history: [],
     triggeredEscalations: [],
     startTime: startTime,
     stateEntryTime: startTime,
@@ -318,16 +299,6 @@ export async function workflow(
   const getInstance = () => buildInstance(config, state);
 
   registerHandlers(config, state, getInstance);
-
-  await sleep("2 second");
-
-  // Publish the initial creation event
-  if (state.lastEventId) {
-    await publishEvent({
-      ...getInstance(),
-      event: state.lastEventId,
-    });
-  }
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
