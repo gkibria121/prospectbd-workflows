@@ -222,7 +222,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         escalations: [
           {
             id: "missing-production",
-            after: { duration: 30, unit: "minutes" },
+            after: { duration: 1, unit: "minutes" },
             actionType: "send-sla",
           },
         ],
