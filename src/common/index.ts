@@ -3,7 +3,7 @@ export * from "./workflow-utils";
 export * from "./registry";
 export * from "./workflow-events";
 export * from "./workflow.states";
-export * from "./alert-registry";
+
 
 import { WORKFLOW_SYSTEM } from "./registry";
 export const getAlertRuleTemplateByName = WORKFLOW_SYSTEM.getAlertRuleTemplateByName;

@@ -45,7 +45,8 @@ export function resolveDisplayPath(
   currentStateId: string,
   history?: WorkflowHistory,
 ): string[] {
-  const { initialState, finalStates, transitions, states } = config.stateMachine;
+  const { initialState, finalStates, transitions, states } =
+    config.stateMachine;
 
   // Build adjacency list
   const adjacency = new Map<string, string[]>();
@@ -71,7 +72,8 @@ export function resolveDisplayPath(
     // 1. Has 0 progress (off-path/terminal failure)
     // 2. HAS NOT BEEN VISITED yet
     return !path.some(
-      (stateId) => !visitedStates.has(stateId) && stateProgress.get(stateId) === 0,
+      (stateId) =>
+        !visitedStates.has(stateId) && stateProgress.get(stateId) === 0,
     );
   });
 
@@ -121,7 +123,6 @@ export function resolveDisplayPath(
   const fallback = pathsToConsider.find((p) => p.includes(currentStateId));
   return fallback ?? longestPath;
 }
-
 
 export function getReachableStates<E extends WorkflowConfig>(
   config: E,
@@ -250,7 +251,10 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
       ),
     ]),
   ) as {
-    [K in keyof T]: Record<T[K]["stateMachine"]["states"][number]["state"], string>;
+    [K in keyof T]: Record<
+      T[K]["stateMachine"]["states"][number]["state"],
+      string
+    >;
   };
   const eventIds = Object.values(workflows).flatMap((flow) =>
     Object.values(flow.Events),
@@ -274,13 +278,18 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
       ),
     ]),
   ) as {
-    [K in keyof T]: Record<T[K]["stateMachine"]["states"][number]["state"], number>;
+    [K in keyof T]: Record<
+      T[K]["stateMachine"]["states"][number]["state"],
+      number
+    >;
   };
 
   // 4. Alert Registry & Methods
-  const allAlerts = Object.values(workflows).flatMap((flow) => flow.alerts || []);
+  const allAlerts = Object.values(workflows).flatMap(
+    (flow) => flow.alerts || [],
+  );
   const alertRegistry = Object.fromEntries(
-    allAlerts.map((alert) => [alert.name, alert])
+    allAlerts.map((alert) => [alert.name, alert]),
   );
 
   return {
@@ -300,7 +309,7 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     ALERT_RULES_REGISTRY: alertRegistry,
     getAlertRuleTemplateByName: (name: string) => alertRegistry[name],
     getAlertRuleTemplatesByEvent: (eventTrigger: string) =>
-      allAlerts.filter((r: any) => r.eventTrigger === eventTrigger && r.isActive),
+      allAlerts.filter((r: any) => r.eventTrigger === eventTrigger),
     getAllAlertRuleTemplates: () => allAlerts,
   } as const;
 }
@@ -433,8 +442,7 @@ export function buildGraph(workflow: WorkflowDto): WorkflowGraph {
   const finalStates = new Set(workflow.config.stateMachine.finalStates);
 
   const activeStateId =
-    workflow.activeState?.state ||
-    workflow.config.stateMachine.initialState;
+    workflow.activeState?.state || workflow.config.stateMachine.initialState;
 
   // Build visited set from history — every toStep that was reached
   const visitedStates = new Set<string>(

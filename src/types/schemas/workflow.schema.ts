@@ -95,10 +95,23 @@ export const WorkflowConfigBaseSchema = z
     stateMachine: WorkflowStateMachineSchema,
   })
   .superRefine((data, ctx) => {
-    const { stateMachine, events } = data;
+    const { stateMachine, events, alerts } = data;
 
     const stateIds = new Set(stateMachine.states.map((s) => s.state));
     const eventIds = new Set(events.map((e) => e.eventId));
+
+    // ── Duplicate alert eventTriggers ──────────────────────────────────────
+    const seenAlertTriggers = new Set<string>();
+    alerts.forEach((a, i) => {
+      if (seenAlertTriggers.has(a.eventTrigger)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["alerts", i, "eventTrigger"],
+          message: `Duplicate alert eventTrigger: "${a.eventTrigger}"`,
+        });
+      }
+      seenAlertTriggers.add(a.eventTrigger);
+    });
 
     // ── Duplicate state IDs ────────────────────────────────────────────────
     const seenStates = new Set<string>();

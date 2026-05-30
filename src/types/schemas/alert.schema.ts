@@ -30,7 +30,7 @@ const AlertRuleTemplateBaseSchema = z.object({
   }),
   severity: AlertSeveritySchema,
   channels: NotificationChannelsSchema,
-  roles: z.array(UserRoleSchema),
+  roles: z.array(UserRoleSchema).min(1, "Minimum one role must be specified."),
   template: z.string(),
   deduplicate: z.boolean(),
   payload: z

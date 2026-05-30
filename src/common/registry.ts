@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { defineWorkflow, defineWorkflowSystem } from "./workflow-utils";
-import * as Alerts from "./alert-registry";
 
 export const ORDER_FLOW_CONFIG = defineWorkflow({
   definitionName: "standard-order-flow",
@@ -119,12 +118,66 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
   ],
   alerts: [
-    Alerts.ORDER_BLOCKED_ALERT,
-    Alerts.MISSING_ARTWORK_ALERT,
-    Alerts.MISSING_PRODUCTION_ALERT,
-    Alerts.MISSING_DELIVERY_ALERT,
-    Alerts.DB_MIGRATION_CLEAR_ALERT,
-    Alerts.DIAGNOSTIC_HEARTBEAT_ALERT,
+    {
+      name: "Order Blocked SLA Alert",
+      eventTrigger: "order-blocked",
+      severity: "CRITICAL",
+      channels: { email: true, sms: true, push: true, slack: true },
+      roles: ["admin"],
+      template:
+        "CRITICAL: Order {orderId} is BLOCKED (Status: {reason}). Manual intervention required to resolve.",
+      deduplicate: true,
+    },
+    {
+      name: "Missing Artwork Allocation",
+      eventTrigger: "missing-artwork",
+      severity: "WARNING",
+      channels: { email: true, sms: false, push: true, slack: true },
+      roles: ["admin", "artwork-designer"],
+      template:
+        "Warning: Order {orderId} has no artwork jobs allocated after {timeElapsed} minutes. Customer/Admin notification pending.",
+      deduplicate: true,
+    },
+    {
+      name: "Missing Production Job Dispatcher",
+      eventTrigger: "missing-production",
+      severity: "WARNING",
+      channels: { email: true, sms: false, push: true, slack: false },
+      roles: ["admin"],
+      template:
+        "Warning: Paid Order {orderId} has no production jobs initialized after {timeElapsed} minutes. Pipeline check required.",
+      deduplicate: true,
+    },
+    {
+      name: "Missing Delivery Dispatcher",
+      eventTrigger: "missing-delivery",
+      severity: "WARNING",
+      channels: { email: true, sms: false, push: false, slack: true },
+      roles: ["admin", "delivery-person"],
+      template:
+        "Warning: Produced Order {orderId} has no delivery jobs initialized after {timeElapsed} minutes.",
+      deduplicate: true,
+    },
+    {
+      name: "DB Migration Clear",
+      eventTrigger: "migration-success",
+      severity: "SUCCESS",
+      channels: { email: true, sms: false, push: true, slack: true },
+      roles: ["admin"],
+      template:
+        "SUCCESS: Database schema migration {version} completed successfully. Active nodes: {nodeCount}.",
+      deduplicate: false,
+    },
+    {
+      name: "Diagnostic worker heartbeat",
+      eventTrigger: "heartbeat-ping",
+      severity: "DEBUG",
+      channels: { email: false, sms: false, push: false, slack: true },
+      roles: ["admin"],
+      template:
+        "DEBUG: Node {nodeId} returned diagnostic status {status} in {ms}ms. CPU usage: {cpu}%.",
+      deduplicate: true,
+    },
   ],
   stateMachine: {
     states: [
@@ -1197,12 +1250,66 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     },
   ],
   alerts: [
-    Alerts.ARTWORK_JOB_NOT_ACCEPTED_ALERT,
-    Alerts.PRODUCTION_JOB_NOT_ACCEPTED_ALERT,
-    Alerts.DELIVERY_JOB_NOT_ACCEPTED_ALERT,
-    Alerts.ARTWORK_JOB_EXPIRED_REJECTED_ALERT,
-    Alerts.PRODUCTION_JOB_EXPIRED_REJECTED_ALERT,
-    Alerts.DELIVERY_JOB_EXPIRED_REJECTED_ALERT,
+    {
+      name: "Artwork Job Not Accepted Escalation",
+      eventTrigger: "artwork-job-not-accepted",
+      severity: "WARNING",
+      channels: { email: true, sms: false, push: false, slack: true },
+      roles: ["artwork-designer"],
+      template:
+        "Warning: Artwork job {jobId} for Order {orderId} has not been accepted within the {timeLimit} minutes SLA threshold.",
+      deduplicate: true,
+    },
+    {
+      name: "Production Job Not Accepted Pager",
+      eventTrigger: "production-job-not-accepted",
+      severity: "CRITICAL",
+      channels: { email: false, sms: true, push: true, slack: true },
+      roles: ["admin"],
+      template:
+        "CRITICAL: Production job {jobId} for Order {orderId} has not been accepted by any floor manager after {timeLimit} minutes.",
+      deduplicate: true,
+    },
+    {
+      name: "Delivery Job Not Accepted Warning",
+      eventTrigger: "delivery-job-not-accepted",
+      severity: "WARNING",
+      channels: { email: false, sms: true, push: true, slack: false },
+      roles: ["admin", "delivery-person"],
+      template:
+        "Warning: Dispatch Delivery job {jobId} for Order {orderId} has not been accepted by any driver after {timeLimit} minutes.",
+      deduplicate: true,
+    },
+    {
+      name: "Artwork Job Expired/Rejected Alert",
+      eventTrigger: "artwork-job-expired-rejected",
+      severity: "CRITICAL",
+      channels: { email: true, sms: true, push: true, slack: true },
+      roles: ["admin", "artwork-designer"],
+      template:
+        "CRITICAL: Artwork job {jobId} for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+      deduplicate: false,
+    },
+    {
+      name: "Production Job Expired/Rejected Alert",
+      eventTrigger: "production-job-expired-rejected",
+      severity: "CRITICAL",
+      channels: { email: true, sms: true, push: true, slack: true },
+      roles: ["admin"],
+      template:
+        "CRITICAL: Production job {jobId} ({jobType}) for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+      deduplicate: false,
+    },
+    {
+      name: "Delivery Job Expired/Rejected Alert",
+      eventTrigger: "delivery-job-expired-rejected",
+      severity: "CRITICAL",
+      channels: { email: true, sms: true, push: true, slack: true },
+      roles: ["admin", "delivery-person"],
+      template:
+        "CRITICAL: Delivery job {jobId} for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+      deduplicate: false,
+    },
   ],
   stateMachine: {
     initialState: "AWAITING_ACCEPTANCE",
@@ -1491,7 +1598,16 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
     { eventId: "DELIVERED", name: "Mark Delivered", icon: "🎉" },
   ],
   alerts: [
-    Alerts.DELIVERY_OVERDUE_ALERT,
+    {
+      name: "Critical Delivery Delay Tracker",
+      eventTrigger: "delivery-overdue",
+      severity: "CRITICAL",
+      channels: { email: true, sms: true, push: true, slack: false },
+      roles: ["admin", "delivery-person"],
+      template:
+        "CRITICAL: Order {orderId} is overdue for delivery. Assigned driver: {driverName}. Expected arrival was {expectedTime}.",
+      deduplicate: true,
+    },
   ],
   stateMachine: {
     initialState: "PENDING",
