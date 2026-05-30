@@ -158,26 +158,6 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         "Warning: Produced Order {orderId} has no delivery jobs initialized after {timeElapsed} minutes.",
       deduplicate: true,
     },
-    {
-      name: "DB Migration Clear",
-      id: "migration-success",
-      severity: "SUCCESS",
-      channels: { email: true, sms: false, push: true, slack: true },
-      roles: ["admin"],
-      template:
-        "SUCCESS: Database schema migration {version} completed successfully. Active nodes: {nodeCount}.",
-      deduplicate: false,
-    },
-    {
-      name: "Diagnostic worker heartbeat",
-      id: "heartbeat-ping",
-      severity: "DEBUG",
-      channels: { email: false, sms: false, push: false, slack: true },
-      roles: ["admin"],
-      template:
-        "DEBUG: Node {nodeId} returned diagnostic status {status} in {ms}ms. CPU usage: {cpu}%.",
-      deduplicate: true,
-    },
   ],
   stateMachine: {
     states: [
