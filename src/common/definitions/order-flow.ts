@@ -197,7 +197,13 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Payment received. Awaiting admin review.",
         requiredRoles: ["admin"],
-        escalations: [],
+        escalations: [
+          {
+            id: "missing-artwork",
+            after: { duration: 1, unit: "minutes" },
+            actionType: "send-sla",
+          },
+        ],
       },
       {
         label: "Reviewed",
@@ -269,7 +275,13 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Production done. Waiting for pickup or dispatch.",
         requiredRoles: ["delivery-person", "admin"],
-        escalations: [],
+        escalations: [
+          {
+            id: "missing-delivery",
+            after: { duration: 1, unit: "minutes" },
+            actionType: "send-sla",
+          },
+        ],
       },
       {
         label: "Collected",
