@@ -5,8 +5,9 @@ export async function sendEscalationAlert(payload: EscalationAlertPayload): Prom
 
   console.warn(
     `${tag} Escalation fired\n` +
-      `  workflowId  : ${payload.workflowId}\n` +
-      `  alertId     : ${payload.alertId}\n` +
+      `  resourceType: ${payload.resourceType}\n` +
+      `  resourceId  : ${payload.resourceId}\n` +
+      `  alertRuleId : ${payload.alertRuleId}\n` +
       `  duration    : ${payload.duration} ${payload.unit}\n` +
       `  firedAt     : ${payload.firedAt}`,
   );

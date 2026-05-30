@@ -404,8 +404,9 @@ export const TriggerEventPayloadSchema = z.object({
 });
 
 export const EscalationAlertPayloadSchema = z.object({
-  workflowId: WorkflowIdSchema,
-  alertId: z.string(),
+  resourceId: WorkflowIdSchema,
+  resourceType: AppResourceSchema,
+  alertRuleId: z.string(),
   duration: z.number(),
   unit: z.enum(["minutes", "hours", "days"]),
   firedAt: z.string().datetime(),
