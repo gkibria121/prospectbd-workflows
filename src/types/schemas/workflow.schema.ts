@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AppResourceSchema, UserRoleSchema } from "./rbac.schema";
 import { ButtonVariantSchema } from "./button.schema";
-import { AlertRuleTemplateDefineSchema } from "./alert.schema";
+import { AlertConfigSchema } from "./alert.schema";
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ export const EscalationSchema = z.discriminatedUnion("actionType", [
     eventId: z.string(),
   }),
   z.object({
-    id: z.string(), // acts as alertId
+    id: z.string(), // references AlertConfig.id
     after: z.object({
       duration: z.number(),
       unit: z.enum(["minutes", "hours", "days"]),
@@ -89,7 +89,7 @@ export const WorkflowConfigBaseSchema = z
     events: z
       .array(WorkflowEventMetaSchema)
       .min(2, { message: "At two events are required" }),
-    alerts: z.array(AlertRuleTemplateDefineSchema).optional().default([]),
+    alerts: z.array(AlertConfigSchema).optional().default([]),
     stateMachine: WorkflowStateMachineSchema,
   })
   .superRefine((data, ctx) => {
@@ -101,14 +101,14 @@ export const WorkflowConfigBaseSchema = z
     // ── Duplicate alert ids ──────────────────────────────────────
     const seenAlertTriggers = new Set<string>();
     alerts.forEach((a, i) => {
-      if (seenAlertTriggers.has(a.alertId)) {
+      if (seenAlertTriggers.has(a.id)) {
         ctx.addIssue({
           code: "custom",
-          path: ["alerts", i, "alertId"],
-          message: `Duplicate alert alertId: "${a.alertId}"`,
+          path: ["alerts", i, "id"],
+          message: `Duplicate alert id: "${a.id}"`,
         });
       }
-      seenAlertTriggers.add(a.alertId);
+      seenAlertTriggers.add(a.id);
     });
 
     // ── Duplicate state IDs ────────────────────────────────────────────────

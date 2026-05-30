@@ -216,11 +216,11 @@ export function defineWorkflow<const T extends WorkflowConfig>(config: T) {
 
   const alerts = Object.fromEntries(
     (config.alerts || []).map((a) => [
-      a.alertId,
-      `${config.definitionName}.${a.alertId}` as const,
+      a.id,
+      `${config.definitionName}.${a.id}` as const,
     ]),
   ) as {
-    [A in NonNullable<T["alerts"]>[number]["alertId"]]: `${T["definitionName"]}.${A}`;
+    [A in NonNullable<T["alerts"]>[number]["id"]]: `${T["definitionName"]}.${A}`;
   };
 
   return {
@@ -323,10 +323,10 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     },
     ALERT_MAP: alertMap,
     ALERT_RULES_REGISTRY: alertRegistry,
-    getAlertRuleTemplateByName: (name: string) => alertRegistry[name],
-    getAlertRuleTemplatesByEvent: (alertId: string) =>
-      allAlerts.filter((r: any) => r.alertId === alertId),
-    getAllAlertRuleTemplates: () => allAlerts,
+    getAlertConfigByName: (name: string) => alertRegistry[name],
+    getAlertConfigsByEvent: (alertId: string) =>
+      allAlerts.filter((r: any) => r.id === alertId),
+    getAllAlertConfigs: () => allAlerts,
   } as const;
 }
 

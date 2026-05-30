@@ -22,9 +22,9 @@ export type NotificationChannels = z.infer<typeof NotificationChannelsSchema>;
 
 // ─── Alert Rule ──────────────────────────────────────────────────────────────
 
-const AlertRuleTemplateBaseSchema = z.object({
+export const AlertConfigBaseSchema = z.object({
   name: z.string(),
-  alertId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message:
       "Must be kebab-case (lowercase letters, numbers, and hyphens only)",
   }),
@@ -43,9 +43,9 @@ const AlertRuleTemplateBaseSchema = z.object({
     .optional(),
 });
 
-export const AlertRuleTemplateSchema = AlertRuleTemplateBaseSchema;
 
-export const AlertRuleSchema = AlertRuleTemplateBaseSchema.superRefine(
+
+export const AlertPayloadSchema = AlertConfigBaseSchema.superRefine(
   (data, ctx) => {
     const templateKeys = [...data.template.matchAll(/\{(\w+)\}/g)].map(
       (m) => m[1],
@@ -67,15 +67,13 @@ export const AlertRuleSchema = AlertRuleTemplateBaseSchema.superRefine(
   },
 );
 
-export const AlertRuleTemplateDefineSchema = AlertRuleTemplateBaseSchema.omit({
+export const AlertConfigSchema = AlertConfigBaseSchema.omit({
   payload: true,
 });
 
-export type AlertRuleTemplate = z.infer<typeof AlertRuleTemplateSchema>;
-export type AlertRule = z.infer<typeof AlertRuleSchema>;
-export type AlertRuleTemplateDefine = z.infer<
-  typeof AlertRuleTemplateDefineSchema
->;
+export type AlertConfigBase = z.infer<typeof AlertConfigBaseSchema>;
+export type AlertPayload = z.infer<typeof AlertPayloadSchema>;
+export type AlertConfig = z.infer<typeof AlertConfigSchema>;
 
 // ─── Status ──────────────────────────────────────────────────────────────────
 
@@ -169,10 +167,8 @@ export type AlertNotification = z.infer<typeof AlertNotificationSchema>;
 
 // ─── API Request Schemas ─────────────────────────────────────────────────────
 
-export const CreateAlertRuleTemplateSchema = AlertRuleTemplateBaseSchema;
-export type CreateAlertRuleTemplate = z.infer<
-  typeof CreateAlertRuleTemplateSchema
->;
+export const CreateAlertConfigSchema = AlertConfigBaseSchema;
+export type CreateAlertConfig = z.infer<typeof CreateAlertConfigSchema>;
 
 export const UpdateAlertLogStatusSchema = z.object({
   status: AlertStatusSchema,
@@ -199,15 +195,13 @@ export type AlertSimulationResponse = z.infer<
   typeof AlertSimulationResponseSchema
 >;
 
-export const AlertRuleTemplatesFilterSchema = z.object({
+export const AlertConfigFilterSchema = z.object({
   searchQuery: z.string().optional(),
   severity: AlertSeveritySchema.or(z.literal("all")).optional(),
   role: z.string().optional(),
   users: z.string().optional(),
 });
-export type AlertRuleTemplatesFilter = z.infer<
-  typeof AlertRuleTemplatesFilterSchema
->;
+export type AlertConfigFilter = z.infer<typeof AlertConfigFilterSchema>;
 
 export const AlertLogsFilterSchema = z.object({
   searchQuery: z.string().optional(),

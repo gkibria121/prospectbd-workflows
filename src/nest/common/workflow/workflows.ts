@@ -254,7 +254,7 @@ async function handleEscalations(
         });
       } else if (nextEscalation.actionType === "send-sla") {
         const alertConfig = config.alerts?.find(
-          (a) => a.alertId === nextEscalation.id
+          (a) => a.id === nextEscalation.id,
         );
 
         if (alertConfig) {
@@ -266,19 +266,9 @@ async function handleEscalations(
             firedAt: new Date().toISOString(),
           });
         }
-        /*
-        console.log(
-          `[Workflow: ${config.definitionName}] SLA Alert sent for "${nextEscalation.id}". Continuing loop in state "${state.currentStateId}"...`,
-        );
-*/
       }
 
       if (state.currentStateId !== frozenStateId) {
-        /*
-        console.log(
-          `[Workflow: ${config.definitionName}] Escalation caused state change. Exiting loop.`,
-        );
-*/
         break;
       }
     }

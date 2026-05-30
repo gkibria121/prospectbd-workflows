@@ -107,7 +107,7 @@ function createTestConfig(
     ],
     alerts: [
       {
-        alertId: "test-alert",
+        id: "test-alert",
         name: "Test Alert",
         severity: "WARNING",
         roles: ["admin"],
@@ -116,7 +116,7 @@ function createTestConfig(
         deduplicate: false,
       },
       {
-        alertId: "early",
+        id: "early",
         name: "Early Alert",
         severity: "WARNING",
         roles: ["admin"],
