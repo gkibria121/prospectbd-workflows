@@ -4,7 +4,7 @@ import {
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from "@nestjs/common";
-import { sendEscalationAlert } from "./alert.activity";
+import { createSendEscalationAlertActivity } from "./alert.activity";
 import { createPublishEventActivity } from "./publisher.activity";
 import { Worker } from "@temporalio/worker";
 import { TemporalService } from "../temporal/temporal.service";
@@ -41,6 +41,7 @@ export class WorkflowWorkerService
 
   async runWorker() {
     const publishEvent = createPublishEventActivity(this.eventEmitter);
+    const sendEscalationAlert = createSendEscalationAlertActivity(this.eventEmitter);
 
     this.workerInstance = await Worker.create({
       connection: this.temporalService.connection!,

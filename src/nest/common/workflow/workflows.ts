@@ -234,12 +234,14 @@ async function handleEscalations(
 
         if (alertConfig) {
           await sendEscalationAlert({
+            definitionName: config.definitionName,
             resourceId: config.workflowId!,
             resourceType: config.resourceType,
             alertRuleId: nextEscalation.id,
             duration: nextEscalation.after.duration,
             unit: nextEscalation.after.unit,
             firedAt: new Date().toISOString(),
+            data: state.data,
           });
         }
       }

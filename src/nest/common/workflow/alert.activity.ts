@@ -1,6 +1,19 @@
 import { EscalationAlertPayload } from "../../../common/workflow-schema";
 
-export async function sendEscalationAlert(payload: EscalationAlertPayload): Promise<void> {
+export function createSendEscalationAlertActivity(emitter: {
+  emit: (event: string, payload: any) => boolean;
+}) {
+  return async function sendEscalationAlert(
+    payload: EscalationAlertPayload,
+  ): Promise<void> {
+    const eventName = `${payload.definitionName}.${payload.alertRuleId}`;
+    emitter.emit(eventName, payload);
+  };
+}
+
+export async function sendEscalationAlert(
+  payload: EscalationAlertPayload,
+): Promise<void> {
   const tag = "🟡 [ESCALATION ALERT]";
 
   console.warn(

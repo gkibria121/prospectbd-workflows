@@ -32,6 +32,7 @@ export const WorkflowEventIdSchema = z.enum(
  * Example: WorkflowEventIdMap.order.PAID_CONFIRMED -> "standard-order-flow.PAID_CONFIRMED"
  */
 export const WorkflowEventIdMap = WORKFLOW_SYSTEM.EVENT_MAP;
+export const WorkflowAlerts = WORKFLOW_SYSTEM.ALERT_MAP;
 
 export type PublishWorkflowEventPayload = {
   [E in WorkflowEventId]: {
