@@ -467,6 +467,58 @@ describe("Temporal workflow()", () => {
     expect(result.currentState?.state).toBe("completed");
   });
 
+  it("make sure sla is fired when conditions are met", async () => {
+    const config = createTestConfig();
+    const pendingState = config.stateMachine.states.find(
+      (s) => s.state === "pending",
+    )!;
+    pendingState.escalations = [
+      {
+        id: "test-alert", // The alert must exist in config.alerts for the condition to be met
+        after: { duration: 15, unit: "minutes" },
+        actionType: "send-sla",
+      },
+    ];
+
+    const workflowPromise = workflow(config);
+    await new Promise((r) => setTimeout(r, 10));
+
+    // Force condition to simulate time passing (condition is met)
+    forceConditionTimeout = true;
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(mockSendEscalationAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertRuleId: "test-alert",
+        duration: 15,
+        unit: "minutes",
+      }),
+    );
+
+    // Cleanly complete workflow
+    const signal = getSignalHandler();
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "confirm",
+      data: {},
+      userRoles: ["customer"],
+    });
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "complete",
+      data: {},
+      userRoles: ["admin"],
+    });
+    notifyCondition();
+
+    const result = await workflowPromise;
+    expect(result.currentState?.state).toBe("completed");
+  });
+
   it("handles getConfig and getInstance queries", async () => {
     const config = createTestConfig();
     const workflowPromise = workflow(config);
@@ -728,5 +780,111 @@ describe("Temporal workflow()", () => {
 
     const result = await workflowPromise;
     expect(result.currentState?.state).toBe("completed");
+  });
+
+  it("does not fire send-sla escalation if alert rule is missing in config", async () => {
+    const config = createTestConfig();
+    const pendingState = config.stateMachine.states.find(
+      (s) => s.state === "pending",
+    )!;
+    pendingState.escalations = [
+      {
+        id: "missing-alert-id",
+        after: { duration: 5, unit: "minutes" },
+        actionType: "send-sla",
+      },
+    ];
+
+    const workflowPromise = workflow(config);
+    await new Promise((r) => setTimeout(r, 10));
+
+    forceConditionTimeout = true;
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    // Shouldn't fire because missing-alert-id is not in config.alerts
+    expect(mockSendEscalationAlert).not.toHaveBeenCalled();
+
+    // Complete workflow
+    const signal = getSignalHandler();
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "confirm",
+      data: {},
+      userRoles: ["customer"],
+    });
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "complete",
+      data: {},
+      userRoles: ["admin"],
+    });
+    notifyCondition();
+    
+    await workflowPromise;
+  });
+
+  it("does not double-prefix eventId if it already includes definitionName", async () => {
+    const config = createTestConfig();
+    const workflowPromise = workflow(config);
+
+    await new Promise((r) => setTimeout(r, 0));
+    const signal = getSignalHandler();
+
+    // Trigger confirm but pass fully qualified eventId
+    signal({
+      workflowId: config.workflowId!,
+      eventId: `${config.definitionName}.confirm`,
+      data: {},
+      userRoles: ["customer"],
+    });
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    // Complete it
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "complete",
+      data: {},
+      userRoles: ["admin"],
+    });
+    notifyCondition();
+    
+    const result = await workflowPromise;
+    expect(result.history[0].eventId).toBe(`${config.definitionName}.confirm`);
+  });
+
+  it("injects proper data payload when raise-event escalation fires", async () => {
+    const config = createTestConfig({
+      stateMachine: {
+        ...createTestConfig().stateMachine,
+        escalations: [
+          {
+            id: "global-esc-raise",
+            after: { duration: 1, unit: "minutes" },
+            actionType: "raise-event",
+            eventId: "expired",
+          },
+        ],
+      },
+    });
+
+    const workflowPromise = workflow(config);
+    await new Promise((r) => setTimeout(r, 10));
+
+    forceConditionTimeout = true;
+    notifyCondition();
+
+    const result = await workflowPromise;
+    expect(result.currentState?.state).toBe("expired-state");
+    expect(result.history[0].data).toMatchObject({
+      resourceType: config.resourceType,
+      id: config.workflowId!,
+      escalationId: "global-esc-raise",
+    });
+    expect(result.history[0].data).toHaveProperty("timestamp");
   });
 });
