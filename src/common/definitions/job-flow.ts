@@ -143,13 +143,13 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
           {
             id: "job-acceptance-warning",
             label: "Job Acceptance Warning",
-            after: { duration: 30, unit: "minutes" },
+            after: { duration: 1, unit: "minutes" },
             actionType: "send-sla",
           },
           {
             id: "job-expiry",
             label: "Job Auto-Expiration",
-            after: { duration: 24, unit: "hours" },
+            after: { duration: 1, unit: "minutes" },
             actionType: "raise-event",
             eventId: "JOB_EXPIRED",
           },

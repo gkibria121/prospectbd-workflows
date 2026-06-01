@@ -122,7 +122,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
           {
             id: "quote-expiry-warning",
             after: {
-              duration: 2,
+              duration: 1,
               unit: "minutes",
             },
             actionType: "send-sla",
@@ -193,7 +193,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         id: "quote-expiry",
         label: "Quote Expiration",
-        after: { duration: 30, unit: "days" }, // Default placeholder, overridden in QuoteService
+        after: { duration: 1, unit: "minutes" }, // Default placeholder, overridden in QuoteService
         actionType: "raise-event",
             eventId: "EXPIRED",
       },
