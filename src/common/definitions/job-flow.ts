@@ -41,7 +41,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: false, push: false, slack: true },
       roles: ["artwork-designer"],
       template:
-        "Warning: Artwork job {jobId} for Order {orderId} has not been accepted within the {timeLimit} minutes SLA threshold.",
+        "Warning: Artwork job {jobNo} for Order {orderNo} has not been accepted within the {timeLimit} minutes SLA threshold.",
       deduplicate: true,
     },
     {
@@ -51,7 +51,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: false, sms: true, push: true, slack: true },
       roles: ["admin"],
       template:
-        "CRITICAL: Production job {jobId} for Order {orderId} has not been accepted by any floor manager after {timeLimit} minutes.",
+        "CRITICAL: Production job {jobNo} for Order {orderNo} has not been accepted by any floor manager after {timeLimit} minutes.",
       deduplicate: true,
     },
     {
@@ -61,7 +61,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: false, sms: true, push: true, slack: false },
       roles: ["admin", "delivery-person"],
       template:
-        "Warning: Dispatch Delivery job {jobId} for Order {orderId} has not been accepted by any driver after {timeLimit} minutes.",
+        "Warning: Dispatch Delivery job {jobNo} for Order {orderNo} has not been accepted by any driver after {timeLimit} minutes.",
       deduplicate: true,
     },
     {
@@ -71,7 +71,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin", "artwork-designer"],
       template:
-        "CRITICAL: Artwork job {jobId} for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+        "CRITICAL: Artwork job {jobNo} for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",
       deduplicate: false,
     },
     {
@@ -81,7 +81,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin"],
       template:
-        "CRITICAL: Production job {jobId} ({jobType}) for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+        "CRITICAL: Production job {jobNo} ({jobType}) for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",
       deduplicate: false,
     },
     {
@@ -91,7 +91,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin", "delivery-person"],
       template:
-        "CRITICAL: Delivery job {jobId} for Order {orderId} has been {action} (Expired/Rejected). Reason: {reason}.",
+        "CRITICAL: Delivery job {jobNo} for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",
       deduplicate: false,
     },
   ],
@@ -227,8 +227,6 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-
-
       // From AWAITING_ACCEPTANCE
       {
         fromState: "AWAITING_ACCEPTANCE",

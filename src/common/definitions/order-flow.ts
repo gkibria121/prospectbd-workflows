@@ -125,7 +125,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: true, push: true, slack: true },
       roles: ["admin"],
       template:
-        "CRITICAL: Order {orderId} is BLOCKED (Status: {reason}). Manual intervention required to resolve.",
+        "CRITICAL: Order {orderNo} is BLOCKED (Status: {reason}). Manual intervention required to resolve.",
       deduplicate: true,
     },
     {
@@ -135,7 +135,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: false, push: true, slack: true },
       roles: ["admin", "artwork-designer"],
       template:
-        "Warning: Order {orderId} has no artwork jobs allocated after {timeElapsed} minutes. Customer/Admin notification pending.",
+        "Warning: Order {orderNo} has no artwork jobs allocated after {timeElapsed} minutes. Customer/Admin notification pending.",
       deduplicate: true,
     },
     {
@@ -145,7 +145,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: false, push: true, slack: false },
       roles: ["admin"],
       template:
-        "Warning: Paid Order {orderId} has no production jobs initialized after {timeElapsed} minutes. Pipeline check required.",
+        "Warning: Paid Order {orderNo} has no production jobs initialized after {timeElapsed} minutes. Pipeline check required.",
       deduplicate: true,
     },
     {
@@ -155,7 +155,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       channels: { email: true, sms: false, push: false, slack: true },
       roles: ["admin", "delivery-person"],
       template:
-        "Warning: Produced Order {orderId} has no delivery jobs initialized after {timeElapsed} minutes.",
+        "Warning: Produced Order {orderNo} has no delivery jobs initialized after {timeElapsed} minutes.",
       deduplicate: true,
     },
   ],
