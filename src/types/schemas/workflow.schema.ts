@@ -254,12 +254,10 @@ export const WorkflowConfigBaseSchema = z
         // Check if this event is triggered by ANY escalation (global or state-specific to this state)
         const isTriggeredByEscalation =
           (stateMachine.escalations ?? []).some(
-            (e) =>
-              e.actionType === "raise-event" && e.eventId === t.eventId,
+            (e) => e.actionType === "raise-event" && e.eventId === t.eventId,
           ) ||
           (fromStep.escalations ?? []).some(
-            (e) =>
-              e.actionType === "raise-event" && e.eventId === t.eventId,
+            (e) => e.actionType === "raise-event" && e.eventId === t.eventId,
           );
 
         if (!isTriggeredByEscalation) {
@@ -331,7 +329,7 @@ export const WorkflowConfigBaseSchema = z
       const stepEscalations = step.escalations ?? [];
       stepEscalations.forEach((esc, ei) => {
         if (esc.actionType === "raise-event") {
-        const eventId = esc.eventId;
+          const eventId = esc.eventId;
           const eventMeta = events.find((e) => e.eventId === eventId);
           if (!eventMeta) {
             ctx.addIssue({
