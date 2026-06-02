@@ -1,18 +1,19 @@
 import { AlertConfig, WorkflowConfig, WorkflowEscalation } from "src/types";
 
-export abstract class EscalationStrategy {
-  alerts: AlertConfig[];
-  escalations: Record<string, WorkflowEscalation>;
+export abstract class EscalationStrategy<
+  T extends WorkflowConfig,
+  G extends AlertConfig[] = AlertConfig[],
+> {
+  alerts: G;
   escalationMap: {
-    state: string;
-    escalation: WorkflowEscalation;
+    state: T["stateMachine"]["states"][number]["state"] | "root";
+    definitionName?: T["definitionName"];
+    escalation: Omit<WorkflowEscalation, "id"> & {
+      id: G[number]["id"];
+    };
   }[];
-  injectEscalations(config: WorkflowConfig) {
-    this.escalationMap = Object.keys(this.escalations).map((e) => ({
-      state: e,
-      escalation: this.escalations[e],
-    }));
-    const updatedConfig: WorkflowConfig = {
+  injectEscalations(config: T) {
+    const updatedConfig: T = {
       ...config,
       alerts: this.alerts,
       stateMachine: {
@@ -20,7 +21,11 @@ export abstract class EscalationStrategy {
         escalations: [
           ...(config.stateMachine.escalations ?? []),
           ...this.escalationMap
-            .filter((em) => em.state === "root")
+            .filter(
+              (em) =>
+                em.state === "root" &&
+                config.definitionName === em.definitionName,
+            )
             .map((em) => em.escalation),
         ],
         states: [

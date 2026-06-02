@@ -1,25 +1,109 @@
+import { WorkflowConfig } from "src/types";
 import { EscalationStrategy } from "../interfaces/escalation.interface";
+import { WORKFLOWS } from "src/common/registry";
+import { ALERTS } from "./const.strategy";
 
-export class UrgentEscalationStrategy extends EscalationStrategy {
+export class UrgentEscalationStrategy extends EscalationStrategy<
+  | typeof WORKFLOWS.order
+  | (typeof WORKFLOWS)["order-item"]
+  | (typeof WORKFLOWS)["order-job"]
+  | (typeof WORKFLOWS)["delivery"],
+  typeof ALERTS
+> {
   constructor() {
     super();
-    this.alerts = [
+    this.alerts = ALERTS;
+    this.escalationMap = [
       {
-        id: "urgent-order-sla-critical",
-        name: "Urgent Order SLA Critical",
-        severity: "CRITICAL",
-        channels: { email: true, sms: true, push: true, slack: true },
-        roles: ["admin"],
-        template: "CRITICAL: Urgent order is breaching SLA after {duration} {unit}!",
-        deduplicate: true,
-      }
+        state: "AWAITING_PAYMENT",
+        escalation: {
+          id: "inquiry-unclaimed",
+          actionType: "send-sla",
+          after: { duration: 3, unit: "minutes" },
+        },
+      },
+      {
+        state: "AWAITING_PAYMENT",
+        escalation: {
+          id: "quote-not-generated",
+          actionType: "send-sla",
+          after: { duration: 10, unit: "minutes" },
+        },
+      },
+      {
+        state: "AWAITING_PAYMENT",
+        escalation: {
+          id: "quote-not-viewed",
+          actionType: "send-sla",
+          after: { duration: 5, unit: "minutes" },
+        },
+      },
+      {
+        state: "PENDING_REVIEW",
+        escalation: {
+          id: "artwork-pending-review",
+          actionType: "send-sla",
+          after: { duration: 5, unit: "minutes" },
+        },
+      },
+      {
+        state: "REVIEWED",
+        escalation: {
+          id: "production-not-assigned",
+          actionType: "send-sla",
+          after: { duration: 5, unit: "minutes" },
+        },
+      },
+      {
+        state: "IN_PRODUCTION",
+        escalation: {
+          id: "ready-for-collection-delay-risk",
+          actionType: "send-sla",
+          after: { duration: 30, unit: "minutes" },
+        },
+      },
+      {
+        state: "READY_FOR_COLLECTION",
+        escalation: {
+          id: "courier-not-assigned",
+          actionType: "send-sla",
+          after: { duration: 5, unit: "minutes" },
+        },
+      },
+      {
+        state: "AWAITING_ACCEPTANCE",
+        escalation: {
+          id: "courier-confirmation-pending",
+          actionType: "send-sla",
+          after: { duration: 3, unit: "minutes" },
+        },
+      },
+      {
+        state: "COLLECTED_FROM_PRODUCTION",
+        escalation: {
+          id: "courier-not-dispatched",
+          actionType: "send-sla",
+          after: { duration: 5, unit: "minutes" },
+        },
+      },
+      {
+        state: "root",
+        definitionName: WORKFLOWS["delivery"]["definitionName"],
+        escalation: {
+          id: "delivery-eta-risk",
+          actionType: "send-sla",
+          after: { duration: 40, unit: "minutes" },
+        },
+      },
+      {
+        state: "root",
+        definitionName: WORKFLOWS["delivery"]["definitionName"],
+        escalation: {
+          id: "delivery-overdue",
+          actionType: "send-sla",
+          after: { duration: 50, unit: "minutes" },
+        },
+      },
     ];
-    this.escalations = {
-      root: {
-        id: "urgent-order-sla-critical",
-        actionType: "send-sla",
-        after: { duration: 48, unit: "hours" }
-      }
-    };
   }
 }

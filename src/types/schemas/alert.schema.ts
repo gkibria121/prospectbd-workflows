@@ -6,7 +6,7 @@ import { userSchema } from "./user.schema";
 
 export const AlertSeveritySchema = z.preprocess(
   (val) => (typeof val === "string" ? val.toUpperCase() : val),
-  z.enum(["CRITICAL", "WARNING", "INFO", "SUCCESS", "DEBUG"]),
+  z.enum(["CRITICAL", "WARNING", "INFO", "SUCCESS", "DEBUG", "TASK"]),
 );
 export type AlertSeverity = z.infer<typeof AlertSeveritySchema>;
 
@@ -42,8 +42,6 @@ export const AlertConfigBaseSchema = z.object({
     .and(z.record(z.string(), z.unknown()))
     .optional(),
 });
-
-
 
 export const AlertPayloadSchema = AlertConfigBaseSchema.superRefine(
   (data, ctx) => {

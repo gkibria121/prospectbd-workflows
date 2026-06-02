@@ -4,6 +4,7 @@ import { defineWorkflow } from "../workflow-utils";
 export const REFUND_FLOW_CONFIG = defineWorkflow({
   definitionName: "refund-lifecycle",
   resourceType: "invoice",
+
   events: [
     {
       icon: "🔄",
@@ -38,7 +39,23 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
       }),
     },
   ],
-  alerts: [],
+  alerts: [
+    {
+      name: "Refund Requested",
+      id: "refund-requested",
+      severity: "WARNING",
+      channels: {
+        email: true,
+        sms: false,
+        push: true,
+        slack: true,
+      },
+      roles: ["admin"],
+      template:
+        "Warning: Refund or compensation request received for order {orderId}. Supervisor review required.",
+      deduplicate: true,
+    },
+  ],
   stateMachine: {
     states: [
       {
@@ -96,6 +113,12 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         toState: "PAID",
       },
     ],
-    escalations: [],
+    escalations: [
+      {
+        id: "refund-requested",
+        actionType: "send-sla",
+        after: { duration: 0.1, unit: "minutes" },
+      },
+    ],
   },
 });
