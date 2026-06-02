@@ -3,6 +3,7 @@ export * from "./workflow-utils";
 export * from "./registry";
 export * from "./workflow-events";
 export * from "./workflow.states";
+export * from "./escalations";
 
 
 import { WORKFLOW_SYSTEM } from "./registry";

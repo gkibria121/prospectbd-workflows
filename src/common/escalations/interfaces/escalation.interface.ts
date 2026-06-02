@@ -7,13 +7,11 @@ export abstract class EscalationStrategy {
     state: string;
     escalation: WorkflowEscalation;
   }[];
-  constructor() {
+  injectEscalations(config: WorkflowConfig) {
     this.escalationMap = Object.keys(this.escalations).map((e) => ({
       state: e,
       escalation: this.escalations[e],
     }));
-  }
-  injectEscalations(config: WorkflowConfig) {
     const updatedConfig: WorkflowConfig = {
       ...config,
       alerts: this.alerts,
