@@ -13,7 +13,7 @@ export const ALERTS = [
     },
     roles: ["admin"],
     template:
-      "Action required: Inquiry {orderId} has not been claimed by any admin after {timeElapsed} minutes.",
+      "Action required: Inquiry {orderNo} has not been claimed by any admin after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -29,7 +29,7 @@ export const ALERTS = [
     },
     roles: ["admin"],
     template:
-      "Action required: Order {orderId} requires a quote, but no quote or invoice has been generated after {timeElapsed} minutes.",
+      "Action required: Order {orderNo} requires a quote, but no quote or invoice has been generated after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -45,7 +45,7 @@ export const ALERTS = [
     },
     roles: ["admin"],
     template:
-      "Warning: Quote for order {orderId} has not been viewed by the customer after {timeElapsed} minutes.",
+      "Warning: Quote for order {orderNo} has not been viewed by the customer after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -61,7 +61,7 @@ export const ALERTS = [
     },
     roles: ["admin", "artwork-designer"],
     template:
-      "Action required: Paid order {orderId} has not moved into artwork review after {timeElapsed} minutes.",
+      "Action required: Paid order {orderNo} has not moved into artwork review after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -77,7 +77,7 @@ export const ALERTS = [
     },
     roles: ["admin", "vendor"],
     template:
-      "Action required: Artwork approved for order {orderId}, but no production run or vendor has been assigned after {timeElapsed} minutes.",
+      "Action required: Artwork approved for order {orderNo}, but no production run or vendor has been assigned after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -93,7 +93,7 @@ export const ALERTS = [
     },
     roles: ["admin", "vendor", "delivery-person"],
     template:
-      "Critical alert: Order {orderId} may miss the planned collection-ready time. Delivery deadline: {deliveryDeadline}. Planned ready time: {plannedReadyTime}.",
+      "Critical alert: Order {orderNo} may miss the planned collection-ready time. Delivery deadline: {deliveryDeadline}. Planned ready time: {plannedReadyTime}.",
     deduplicate: true,
   },
   {
@@ -108,7 +108,7 @@ export const ALERTS = [
     },
     roles: ["admin", "delivery-person"],
     template:
-      "Action required: Delivery required for order {orderId}, but no courier has been assigned after {timeElapsed} minutes.",
+      "Action required: Delivery required for order {orderNo}, but no courier has been assigned after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -124,7 +124,7 @@ export const ALERTS = [
     },
     roles: ["admin", "delivery-person"],
     template:
-      "Action required: Courier assigned to order {orderId} has not acknowledged the assignment after {timeElapsed} minutes.",
+      "Action required: Courier assigned to order {orderNo} has not acknowledged the assignment after {duration} {durationUnit}.",
 
     deduplicate: true,
   },
@@ -140,7 +140,7 @@ export const ALERTS = [
     },
     roles: ["admin", "delivery-person"],
     template:
-      "Warning: Courier collected order {orderId}, but dispatch/in-transit status has not started near the delivery SLA.",
+      "Warning: Courier collected order {orderNo}, but dispatch/in-transit status has not started near the delivery SLA.",
     deduplicate: true,
   },
   {
@@ -155,7 +155,7 @@ export const ALERTS = [
     },
     roles: ["admin", "delivery-person"],
     template:
-      "Warning: Delivery ETA for order {orderId} is close to the promised delivery time. ETA: {eta}. Deadline: {deliveryDeadline}.",
+      "Warning: Delivery ETA for order {orderNo} is close to the promised delivery time. ETA: {eta}. Deadline: {deliveryDeadline}.",
     deduplicate: true,
   },
   {
@@ -170,7 +170,7 @@ export const ALERTS = [
     },
     roles: ["admin", "delivery-person"],
     template:
-      "Critical alert: Order {orderId} has exceeded the promised delivery time. Deadline: {deliveryDeadline}. Current time: {currentTime}.",
+      "Critical alert: Order {orderNo} has exceeded the promised delivery time. Deadline: {deliveryDeadline}. Current time: {currentTime}.",
     deduplicate: true,
   },
   {
@@ -185,7 +185,7 @@ export const ALERTS = [
     },
     roles: ["admin"],
     template:
-      "Warning: Refund or compensation request received for order {orderId}. Supervisor review required.",
+      "Warning: Refund or compensation request received for order {orderNo}. Supervisor review required.",
     deduplicate: true,
   },
 ] as const satisfies readonly AlertConfig[];
