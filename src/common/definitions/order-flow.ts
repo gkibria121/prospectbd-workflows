@@ -117,48 +117,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       }),
     },
   ],
-  alerts: [
-    {
-      name: "Order Blocked SLA Alert",
-      id: "order-blocked",
-      severity: "CRITICAL",
-      channels: { email: true, sms: true, push: true, slack: true },
-      roles: ["admin"],
-      template:
-        "CRITICAL: Order {orderNo} is BLOCKED (Status: {reason}). Manual intervention required to resolve.",
-      deduplicate: true,
-    },
-    {
-      name: "Missing Artwork Allocation",
-      id: "missing-artwork",
-      severity: "WARNING",
-      channels: { email: true, sms: false, push: true, slack: true },
-      roles: ["admin", "artwork-designer"],
-      template:
-        "Warning: Order {orderNo} has no artwork jobs allocated after {timeElapsed} minutes. Customer/Admin notification pending.",
-      deduplicate: true,
-    },
-    {
-      name: "Missing Production Job Dispatcher",
-      id: "missing-production",
-      severity: "WARNING",
-      channels: { email: true, sms: false, push: true, slack: false },
-      roles: ["admin"],
-      template:
-        "Warning: Paid Order {orderNo} has no production jobs initialized after {timeElapsed} minutes. Pipeline check required.",
-      deduplicate: true,
-    },
-    {
-      name: "Missing Delivery Dispatcher",
-      id: "missing-delivery",
-      severity: "WARNING",
-      channels: { email: true, sms: false, push: false, slack: true },
-      roles: ["admin", "delivery-person"],
-      template:
-        "Warning: Produced Order {orderNo} has no delivery jobs initialized after {timeElapsed} minutes.",
-      deduplicate: true,
-    },
-  ],
+  alerts: [],
   stateMachine: {
     states: [
       {
@@ -197,13 +156,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Payment received. Awaiting admin review.",
         requiredRoles: ["admin"],
-        escalations: [
-          {
-            id: "missing-artwork",
-            after: { duration: 1, unit: "minutes" },
-            actionType: "send-sla",
-          },
-        ],
+        escalations: [],
       },
       {
         label: "Reviewed",
@@ -225,13 +178,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Order approved and ready for production.",
         requiredRoles: ["admin", "vendor"],
-        escalations: [
-          {
-            id: "missing-production",
-            after: { duration: 1, unit: "minutes" },
-            actionType: "send-sla",
-          },
-        ],
+        escalations: [],
       },
       {
         label: "In Production",
@@ -275,13 +222,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         ],
         description: "Production done. Waiting for pickup or dispatch.",
         requiredRoles: ["delivery-person", "admin"],
-        escalations: [
-          {
-            id: "missing-delivery",
-            after: { duration: 1, unit: "minutes" },
-            actionType: "send-sla",
-          },
-        ],
+        escalations: [],
       },
       {
         label: "Collected",
