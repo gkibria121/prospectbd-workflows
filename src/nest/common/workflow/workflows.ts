@@ -242,6 +242,7 @@ async function handleEscalations(
             unit: nextEscalation.after.unit,
             firedAt: new Date().toISOString(),
             data: state.data,
+            alertConfig,
           });
         }
       }

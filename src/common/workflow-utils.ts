@@ -324,9 +324,6 @@ export function defineWorkflowSystem<T extends Record<string, any>>(
     ALERT_MAP: alertMap,
     ALERT_RULES_REGISTRY: alertRegistry,
     getAlertConfigByName: (name: string) => alertRegistry[name],
-    getAlertConfigsByEvent: (alertId: string) =>
-      allAlerts.filter((r: any) => r.id === alertId),
-    getAllAlertConfigs: () => allAlerts,
   } as const;
 }
 

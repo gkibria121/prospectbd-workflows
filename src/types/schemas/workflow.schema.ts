@@ -410,6 +410,7 @@ export const EscalationAlertPayloadSchema = z.object({
   unit: z.enum(["minutes", "hours", "days"]),
   firedAt: z.string().datetime(),
   data: z.record(z.string(), z.unknown()).optional(),
+  alertConfig: AlertConfigSchema,
 });
 
 export const WorkflowTemplateSchema = z
