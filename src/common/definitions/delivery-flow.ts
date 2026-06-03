@@ -3,7 +3,7 @@ import { defineWorkflow } from "../workflow-utils";
 
 export const DELIVERY_FLOW_CONFIG = defineWorkflow({
   definitionName: "delivery-lifecycle",
-  resourceType: "delivery-run",
+  resourceType: "delivery-job",
 
   events: [
     { eventId: "DRAFT_CREATED", name: "Create Job", icon: "📝" },
@@ -88,7 +88,6 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-
       {
         fromState: "PENDING",
         toState: "COLLECTED_FROM_PRODUCTION",

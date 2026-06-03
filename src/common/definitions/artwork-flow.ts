@@ -2,7 +2,7 @@ import { defineWorkflow } from "../workflow-utils";
 
 export const ARTWORK_FLOW_CONFIG = defineWorkflow({
   definitionName: "artwork-lifecycle",
-  resourceType: "artwork-run",
+  resourceType: "artwork-job",
 
   events: [
     { eventId: "DRAFT_CREATED", name: "Create Run", icon: "📝" },
@@ -130,8 +130,6 @@ export const ARTWORK_FLOW_CONFIG = defineWorkflow({
     ],
 
     transitions: [
-
-
       // Normal path: Pending -> Received -> Review -> Approved
       {
         fromState: "ARTWORK_PENDING",

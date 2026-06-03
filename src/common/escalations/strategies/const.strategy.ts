@@ -189,3 +189,5 @@ export const ALERTS = [
     deduplicate: true,
   },
 ] as const satisfies readonly AlertConfig[];
+
+export type AlertId = (typeof ALERTS)[number]["id"];
