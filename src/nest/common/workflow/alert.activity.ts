@@ -1,4 +1,5 @@
 import { EscalationAlertPayload } from "../../../common/workflow-schema";
+import { WORKFLOW_ALERT_PREFIX } from "../../../common/workflow-events";
 
 export function createSendEscalationAlertActivity(emitter: {
   emit: (event: string, payload: any) => boolean;
@@ -6,7 +7,7 @@ export function createSendEscalationAlertActivity(emitter: {
   return async function sendEscalationAlert(
     payload: EscalationAlertPayload,
   ): Promise<void> {
-    const eventName = `workflow-alert.${payload.definitionName}.${payload.alertRuleId}`;
+    const eventName = `${WORKFLOW_ALERT_PREFIX}.${payload.definitionName}.${payload.alertRuleId}`;
     emitter.emit(eventName, payload);
   };
 }
