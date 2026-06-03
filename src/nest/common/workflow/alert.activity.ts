@@ -6,7 +6,7 @@ export function createSendEscalationAlertActivity(emitter: {
   return async function sendEscalationAlert(
     payload: EscalationAlertPayload,
   ): Promise<void> {
-    const eventName = `${payload.definitionName}.${payload.alertRuleId}`;
+    const eventName = `workflow-alert.${payload.definitionName}.${payload.alertRuleId}`;
     emitter.emit(eventName, payload);
   };
 }
