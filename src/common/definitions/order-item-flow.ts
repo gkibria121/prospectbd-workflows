@@ -72,22 +72,6 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
   stateMachine: {
     states: [
       {
-        label: "Awaiting Payment",
-        state: "AWAITING_PAYMENT",
-        progress: 10,
-        actions: [
-          {
-            icon: "💳",
-            label: "Pay & Confirm",
-            eventId: "PAID_CONFIRMED",
-            variant: "bluePrimary",
-          },
-        ],
-        description: "Order created but not paid yet.",
-        requiredRoles: ["customer", "admin"],
-        escalations: [],
-      },
-      {
         label: "Pending Review",
         state: "PENDING_REVIEW",
         progress: 20,
@@ -199,14 +183,9 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
         escalations: [],
       },
     ],
-    initialState: "AWAITING_PAYMENT",
+    initialState: "PENDING_REVIEW",
     finalStates: ["DELIVERED"],
     transitions: [
-      {
-        fromState: "AWAITING_PAYMENT",
-        eventId: "PAID_CONFIRMED",
-        toState: "PENDING_REVIEW",
-      },
       {
         fromState: "PENDING_REVIEW",
         eventId: "ADMIN_REVIEWED",

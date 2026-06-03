@@ -1,8 +1,15 @@
-import { EscalationStrategy } from "../interfaces/escalation.interface";
-import { WORKFLOWS } from "./../../registry";
-import { ALERTS } from "./const.strategy";
+import { describe, it, expect } from "bun:test";
+import { EscalationStrategy } from "./escalation.interface";
+import { ALERTS } from "../strategies/const.strategy";
+import {
+  ORDER_FLOW_CONFIG,
+  ORDER_ITEM_FLOW_CONFIG,
+  WORKFLOWS,
+} from "src/common/registry";
 
-export class UrgentEscalationStrategy extends EscalationStrategy<
+const MOCK_ALERTS = ALERTS;
+
+class TestStrategy extends EscalationStrategy<
   | typeof WORKFLOWS.order
   | (typeof WORKFLOWS)["order-item"]
   | (typeof WORKFLOWS)["order-job"]
@@ -11,7 +18,7 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
 > {
   constructor() {
     super();
-    this.alerts = ALERTS;
+    this.alerts = MOCK_ALERTS;
     this.escalationMap = [
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
@@ -115,3 +122,36 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
     ];
   }
 }
+describe("EscalationStrategy", () => {
+  it("should inject escalations correctly for a matching definitionName", () => {
+    const strategy = new TestStrategy();
+    const config = {
+      ...ORDER_FLOW_CONFIG,
+      workflowId: "test-workflow",
+    };
+
+    const updated = strategy.injectEscalations(config);
+
+    // root-level escalations (none for 'order')
+    expect(updated.stateMachine.escalations).toHaveLength(0);
+
+    const expectedInjectedCounts: Record<string, number> = {
+      AWAITING_PAYMENT: 3,
+      PENDING_REVIEW: 1,
+      REVIEWED: 1,
+      IN_PRODUCTION: 1,
+      READY_FOR_COLLECTION: 1,
+    };
+
+    for (const state of updated.stateMachine.states) {
+      const originalState = config.stateMachine.states.find(
+        (s: any) => s.state === state.state,
+      );
+      const originalLength = originalState?.escalations?.length || 0;
+      const expectedInjected = expectedInjectedCounts[state.state] || 0;
+      const expectedTotal = originalLength + expectedInjected;
+
+      expect(state.escalations || []).toHaveLength(expectedTotal);
+    }
+  });
+});

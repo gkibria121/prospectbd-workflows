@@ -24,7 +24,9 @@ export abstract class EscalationStrategy<
             .filter(
               (em) =>
                 em.state === "root" &&
-                config.definitionName === em.definitionName,
+                (em.definitionName
+                  ? config.definitionName === em.definitionName
+                  : true),
             )
             .map((em) => em.escalation),
         ],
@@ -35,9 +37,10 @@ export abstract class EscalationStrategy<
               ...(state.escalations ?? []),
               ...this.escalationMap
                 .filter((em) =>
-                  em.state === state.state && em.definitionName
+                  em.state === state.state &&
+                  (em.definitionName
                     ? em.definitionName === config.definitionName
-                    : true,
+                    : true),
                 )
                 .map((em) => em.escalation),
             ],
