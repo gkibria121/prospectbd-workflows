@@ -34,6 +34,8 @@ export const WorkflowEventIdSchema = z.enum(
 export const WorkflowEventIdMap = WORKFLOW_SYSTEM.EVENT_MAP;
 export const WorkflowAlerts = WORKFLOW_SYSTEM.ALERT_MAP;
 
+export const WORKFLOW_ALERT_PREFIX = "workflow-alert" as const;
+
 export type PublishWorkflowEventPayload = {
   [E in WorkflowEventId]: {
     workflowId: string;
