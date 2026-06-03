@@ -2,7 +2,7 @@ import { AlertConfig, WorkflowConfig, WorkflowEscalation } from "src/types";
 
 export abstract class EscalationStrategy<
   T extends WorkflowConfig,
-  G extends AlertConfig[] = AlertConfig[],
+  G extends readonly AlertConfig[] = readonly AlertConfig[],
 > {
   alerts: G;
   escalationMap: {
@@ -34,7 +34,11 @@ export abstract class EscalationStrategy<
             escalations: [
               ...(state.escalations ?? []),
               ...this.escalationMap
-                .filter((em) => em.state === state.state)
+                .filter((em) =>
+                  em.state === state.state && em.definitionName
+                    ? em.definitionName === config.definitionName
+                    : true,
+                )
                 .map((em) => em.escalation),
             ],
           })),

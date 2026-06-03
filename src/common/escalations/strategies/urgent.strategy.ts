@@ -1,6 +1,5 @@
-import { WorkflowConfig } from "src/types";
 import { EscalationStrategy } from "../interfaces/escalation.interface";
-import { WORKFLOWS } from "src/common/registry";
+import { WORKFLOWS } from "./../../registry";
 import { ALERTS } from "./const.strategy";
 
 export class UrgentEscalationStrategy extends EscalationStrategy<
@@ -15,75 +14,84 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
     this.alerts = ALERTS;
     this.escalationMap = [
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
         escalation: {
           id: "inquiry-unclaimed",
           actionType: "send-sla",
-          after: { duration: 3, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
         escalation: {
           id: "quote-not-generated",
           actionType: "send-sla",
-          after: { duration: 10, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
         escalation: {
           id: "quote-not-viewed",
           actionType: "send-sla",
-          after: { duration: 5, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "PENDING_REVIEW",
         escalation: {
           id: "artwork-pending-review",
           actionType: "send-sla",
-          after: { duration: 5, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "REVIEWED",
         escalation: {
           id: "production-not-assigned",
           actionType: "send-sla",
-          after: { duration: 5, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "IN_PRODUCTION",
         escalation: {
           id: "ready-for-collection-delay-risk",
           actionType: "send-sla",
-          after: { duration: 30, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order"]["definitionName"],
         state: "READY_FOR_COLLECTION",
         escalation: {
           id: "courier-not-assigned",
           actionType: "send-sla",
-          after: { duration: 5, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["order-job"]["definitionName"],
         state: "AWAITING_ACCEPTANCE",
         escalation: {
           id: "courier-confirmation-pending",
           actionType: "send-sla",
-          after: { duration: 3, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
+        definitionName: WORKFLOWS["delivery"]["definitionName"],
         state: "COLLECTED_FROM_PRODUCTION",
         escalation: {
           id: "courier-not-dispatched",
           actionType: "send-sla",
-          after: { duration: 5, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
@@ -92,7 +100,7 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
         escalation: {
           id: "delivery-eta-risk",
           actionType: "send-sla",
-          after: { duration: 40, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
       {
@@ -101,7 +109,7 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
         escalation: {
           id: "delivery-overdue",
           actionType: "send-sla",
-          after: { duration: 50, unit: "minutes" },
+          after: { duration: 1, unit: "minutes" },
         },
       },
     ];

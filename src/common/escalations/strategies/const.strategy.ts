@@ -188,4 +188,4 @@ export const ALERTS = [
       "Warning: Refund or compensation request received for order {orderId}. Supervisor review required.",
     deduplicate: true,
   },
-] satisfies readonly AlertConfig[];
+] as const satisfies readonly AlertConfig[];
