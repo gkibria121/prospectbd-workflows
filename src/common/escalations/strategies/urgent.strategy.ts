@@ -1,7 +1,7 @@
 import { EscalationStrategy } from "../interfaces/escalation.interface";
 import { WORKFLOWS } from "./../../registry";
 import { ALERTS } from "./const.strategy";
-
+import { InquiryNotClaimedAlert } from "./../alerts/inquery-not-claimed.alert";
 export class UrgentEscalationStrategy extends EscalationStrategy<
   | typeof WORKFLOWS.order
   | (typeof WORKFLOWS)["order-item"]
@@ -16,11 +16,10 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
-        escalation: {
-          id: "inquiry-unclaimed",
+        escalation: InquiryNotClaimedAlert.prototype.getEscalation({
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
