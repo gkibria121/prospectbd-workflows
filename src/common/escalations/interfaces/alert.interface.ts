@@ -51,9 +51,32 @@ export abstract class IAlert<TContext = any> {
     return true;
   }
 
+  public getHandler(payload: EscalationAlertPayload): IAlert<TContext> | null {
+    const alertId = payload.alertRuleId;
+    const isMatch =
+      alertId === this.alert.id ||
+      alertId.replace(/-/g, "_") === this.alert.id.replace(/-/g, "_");
+
+    if (isMatch) {
+      return this;
+    }
+    if (this.nextAlert) {
+      return this.nextAlert.getHandler(payload);
+    }
+    return null;
+  }
+
   // The actual rule check implemented by each alert subclass
   protected abstract checkRule(
     context: TContext,
     payload: EscalationAlertPayload,
   ): Promise<boolean> | boolean;
+
+  // Context resolution logic, can be overridden by each alert subclass
+  public async getContext(
+    context: TContext,
+    payload: EscalationAlertPayload,
+  ): Promise<Record<string, any>> {
+    return {};
+  }
 }
