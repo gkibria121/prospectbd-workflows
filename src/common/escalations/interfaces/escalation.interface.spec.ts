@@ -13,12 +13,10 @@ class TestStrategy extends EscalationStrategy<
   | typeof WORKFLOWS.order
   | (typeof WORKFLOWS)["order-item"]
   | (typeof WORKFLOWS)["order-job"]
-  | (typeof WORKFLOWS)["delivery"],
-  typeof ALERTS
+  | (typeof WORKFLOWS)["delivery"]
 > {
   constructor() {
     super();
-    this.alerts = MOCK_ALERTS;
     this.escalationMap = [
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
@@ -27,6 +25,7 @@ class TestStrategy extends EscalationStrategy<
           id: "inquiry-unclaimed",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[0],
         },
       },
       {
@@ -36,6 +35,7 @@ class TestStrategy extends EscalationStrategy<
           id: "quote-not-generated",
           actionType: "send-sla",
           after: { duration: 2, unit: "minutes" },
+          alertRule: MOCK_ALERTS[1],
         },
       },
       {
@@ -45,6 +45,7 @@ class TestStrategy extends EscalationStrategy<
           id: "quote-not-viewed",
           actionType: "send-sla",
           after: { duration: 3, unit: "minutes" },
+          alertRule: MOCK_ALERTS[2],
         },
       },
       {
@@ -54,6 +55,7 @@ class TestStrategy extends EscalationStrategy<
           id: "artwork-pending-review",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[3],
         },
       },
       {
@@ -63,6 +65,7 @@ class TestStrategy extends EscalationStrategy<
           id: "production-not-assigned",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[4],
         },
       },
       {
@@ -72,6 +75,7 @@ class TestStrategy extends EscalationStrategy<
           id: "ready-for-collection-delay-risk",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[5],
         },
       },
       {
@@ -81,6 +85,7 @@ class TestStrategy extends EscalationStrategy<
           id: "courier-not-assigned",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[6],
         },
       },
       {
@@ -90,6 +95,7 @@ class TestStrategy extends EscalationStrategy<
           id: "courier-confirmation-pending",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[7],
         },
       },
       {
@@ -99,6 +105,7 @@ class TestStrategy extends EscalationStrategy<
           id: "courier-not-dispatched",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[8],
         },
       },
       {
@@ -108,6 +115,7 @@ class TestStrategy extends EscalationStrategy<
           id: "delivery-eta-risk",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[9],
         },
       },
       {
@@ -117,6 +125,7 @@ class TestStrategy extends EscalationStrategy<
           id: "delivery-overdue",
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
+          alertRule: MOCK_ALERTS[10],
         },
       },
     ];

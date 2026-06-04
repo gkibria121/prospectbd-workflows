@@ -7,7 +7,6 @@ export class PriorityNextDayEscalationStrategy extends EscalationStrategy<
 > {
   constructor() {
     super();
-    this.alerts = ALERTS;
     this.escalationMap = [];
   }
 }

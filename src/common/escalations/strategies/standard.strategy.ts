@@ -8,7 +8,6 @@ export class StandardEscalationStrategy extends EscalationStrategy<
 > {
   constructor() {
     super();
-    this.alerts = ALERTS;
     this.escalationMap = [];
   }
 }

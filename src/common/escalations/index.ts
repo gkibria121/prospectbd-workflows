@@ -1,4 +1,5 @@
 export * from "./interfaces/escalation.interface";
+export * from "./interfaces/alert.interface";
 export * from "./strategies/const.strategy";
 export * from "./strategies/standard.strategy";
 export * from "./strategies/urgent.strategy";

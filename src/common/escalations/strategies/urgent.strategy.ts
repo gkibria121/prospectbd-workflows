@@ -1,22 +1,26 @@
 import { EscalationStrategy } from "../interfaces/escalation.interface";
 import { WORKFLOWS } from "./../../registry";
 import { ALERTS } from "./const.strategy";
-import { InquiryNotClaimedAlert } from "./../alerts/inquery-not-claimed.alert";
+
+const getEscalation = (id: typeof ALERTS[number]["id"], trigger: any) => {
+  const alertRule = ALERTS.find((a) => a.id === id);
+  if (!alertRule) throw new Error(`Alert rule ${id} not found`);
+  return { ...trigger, id, alertRule };
+};
+
 export class UrgentEscalationStrategy extends EscalationStrategy<
   | typeof WORKFLOWS.order
   | (typeof WORKFLOWS)["order-item"]
   | (typeof WORKFLOWS)["order-job"]
-  | (typeof WORKFLOWS)["delivery"],
-  typeof ALERTS
+  | (typeof WORKFLOWS)["delivery"]
 > {
   constructor() {
     super();
-    this.alerts = ALERTS;
     this.escalationMap = [
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
-        escalation: InquiryNotClaimedAlert.prototype.getEscalation({
+        escalation: getEscalation("inquiry-unclaimed", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
         }),
@@ -24,93 +28,84 @@ export class UrgentEscalationStrategy extends EscalationStrategy<
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
-        escalation: {
-          id: "quote-not-generated",
+        escalation: getEscalation("quote-not-generated", {
           actionType: "send-sla",
           after: { duration: 2, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "AWAITING_PAYMENT",
-        escalation: {
-          id: "quote-not-viewed",
+        escalation: getEscalation("quote-not-viewed", {
           actionType: "send-sla",
           after: { duration: 3, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "PENDING_REVIEW",
-        escalation: {
-          id: "artwork-pending-review",
+        escalation: getEscalation("artwork-pending-review", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "REVIEWED",
-        escalation: {
-          id: "production-not-assigned",
+        escalation: getEscalation("production-not-assigned", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "IN_PRODUCTION",
-        escalation: {
-          id: "ready-for-collection-delay-risk",
+        escalation: getEscalation("ready-for-collection-delay-risk", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order"]["definitionName"],
         state: "READY_FOR_COLLECTION",
-        escalation: {
-          id: "courier-not-assigned",
+        escalation: getEscalation("courier-not-assigned", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["order-job"]["definitionName"],
         state: "AWAITING_ACCEPTANCE",
-        escalation: {
-          id: "courier-confirmation-pending",
+        escalation: getEscalation("courier-confirmation-pending", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         definitionName: WORKFLOWS["delivery"]["definitionName"],
         state: "COLLECTED_FROM_PRODUCTION",
-        escalation: {
-          id: "courier-not-dispatched",
+        escalation: getEscalation("courier-not-dispatched", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         state: "root",
         definitionName: WORKFLOWS["delivery"]["definitionName"],
-        escalation: {
-          id: "delivery-eta-risk",
+        escalation: getEscalation("delivery-eta-risk", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
       {
         state: "root",
         definitionName: WORKFLOWS["delivery"]["definitionName"],
-        escalation: {
-          id: "delivery-overdue",
+        escalation: getEscalation("delivery-overdue", {
           actionType: "send-sla",
           after: { duration: 1, unit: "minutes" },
-        },
+        }),
       },
     ];
   }
 }
+
