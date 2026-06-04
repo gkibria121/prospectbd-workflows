@@ -407,8 +407,10 @@ export const EscalationAlertPayloadSchema = z.object({
   resourceType: AppResourceSchema,
   alertRuleId: z.string(),
   duration: z.number(),
+  durationUnit: z.enum(["minutes", "hours", "days"]),
   unit: z.enum(["minutes", "hours", "days"]),
   firedAt: z.string().datetime(),
+  action: z.literal("sla_escalation"),
   data: z.record(z.string(), z.unknown()).optional(),
   alertConfig: AlertConfigSchema,
 });

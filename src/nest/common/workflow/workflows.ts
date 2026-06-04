@@ -239,8 +239,10 @@ async function handleEscalations(
             resourceType: config.resourceType,
             alertRuleId: nextEscalation.id,
             duration: nextEscalation.after.duration,
+            durationUnit: nextEscalation.after.unit,
             unit: nextEscalation.after.unit,
             firedAt: new Date().toISOString(),
+            action: "sla_escalation",
             data: state.data,
             alertConfig,
           });
