@@ -8,7 +8,7 @@ export abstract class IAlert<TContext = any> {
   abstract readonly alert: AlertConfig;
 
   protected nextAlert: IAlert<TContext> | null = null;
-  protected trigger?: Pick<WorkflowEscalation, "actionType" | "after">;
+  protected trigger?: Pick<WorkflowEscalation, "after">;
 
   public setNext(alert: IAlert<TContext>): IAlert<TContext> {
     this.nextAlert = alert;
@@ -16,13 +16,14 @@ export abstract class IAlert<TContext = any> {
   }
 
   getEscalation(
-    trigger: Pick<WorkflowEscalation, "actionType" | "after">,
+    trigger: Pick<WorkflowEscalation, "after">,
   ): WorkflowEscalation & { alertRule: AlertConfig } {
     this.trigger = trigger;
     return {
       ...this.trigger,
       id: this.alert.id,
       alertRule: this.alert,
+      actionType: "send-sla",
     } as WorkflowEscalation & { alertRule: AlertConfig };
   }
 
