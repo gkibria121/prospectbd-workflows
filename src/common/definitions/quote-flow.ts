@@ -174,7 +174,6 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       },
     ],
     transitions: [
-
       { fromState: "DRAFT", toState: "DRAFT", eventId: "EDITED" },
       { fromState: "DRAFT", toState: "ACCEPTED", eventId: "CUSTOMER_APPROVED" },
       { fromState: "DRAFT", toState: "SENT", eventId: "SENT_TO_CUSTOMER" },
@@ -193,9 +192,9 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       {
         id: "quote-expiry",
         label: "Quote Expiration",
-        after: { duration: 1, unit: "minutes" }, // Default placeholder, overridden in QuoteService
+        after: { duration: 100, unit: "days" }, // Default placeholder, overridden in QuoteService
         actionType: "raise-event",
-            eventId: "EXPIRED",
+        eventId: "EXPIRED",
       },
     ],
   },
