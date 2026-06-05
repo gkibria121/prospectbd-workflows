@@ -40,10 +40,29 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
     },
     {
       icon: "↩️",
+      name: "Cancel Refund (In Review)",
+      eventId: "REFUND_CANCELED_IN_IN_REVIEW",
+      schema: z.object({
+        orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "↩️",
       name: "Cancel Refund (In Production)",
       eventId: "REFUND_CANCELED_IN_PRODUCTION",
       schema: z.object({
         orderId: z.string(),
+        timestamp: z.string(),
+      }),
+    },
+    {
+      icon: "👀",
+      name: "Start Review",
+      eventId: "REVIEW_STARTED",
+      schema: z.object({
+        orderId: z.string(),
+        orderNo: z.string(),
         timestamp: z.string(),
       }),
     },
@@ -142,6 +161,28 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         progress: 20,
         actions: [
           {
+            icon: "👀",
+            label: "Start Review",
+            eventId: "REVIEW_STARTED",
+            variant: "blueSecondary",
+          },
+          {
+            icon: "🔄",
+            label: "Initiate Refund",
+            eventId: "REFUND_INITIATED",
+            variant: "redDanger",
+          },
+        ],
+        description: "Payment received. Awaiting admin review.",
+        requiredRoles: ["admin"],
+        escalations: [],
+      },
+      {
+        label: "In Review",
+        state: "IN_REVIEW",
+        progress: 25,
+        actions: [
+          {
             icon: "✅",
             label: "Review Order",
             eventId: "ADMIN_REVIEWED",
@@ -154,7 +195,7 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
             variant: "redDanger",
           },
         ],
-        description: "Payment received. Awaiting admin review.",
+        description: "Admin is currently reviewing the order.",
         requiredRoles: ["admin"],
         escalations: [],
       },
@@ -291,6 +332,12 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
           },
           {
             icon: "↩️",
+            label: "Cancel Refund → In Review",
+            eventId: "REFUND_CANCELED_IN_IN_REVIEW",
+            variant: "graySecondary",
+          },
+          {
+            icon: "↩️",
             label: "Cancel Refund → Reviewed",
             eventId: "REFUND_CANCELED_IN_REVIEWED",
             variant: "graySecondary",
@@ -326,6 +373,11 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
       },
       {
         fromState: "PENDING_REVIEW",
+        eventId: "REVIEW_STARTED",
+        toState: "IN_REVIEW",
+      },
+      {
+        fromState: "IN_REVIEW",
         eventId: "ADMIN_REVIEWED",
         toState: "REVIEWED",
       },
@@ -365,6 +417,11 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         toState: "REFUND_IN_PROGRESS",
       },
       {
+        fromState: "IN_REVIEW",
+        eventId: "REFUND_INITIATED",
+        toState: "REFUND_IN_PROGRESS",
+      },
+      {
         fromState: "REVIEWED",
         eventId: "REFUND_INITIATED",
         toState: "REFUND_IN_PROGRESS",
@@ -388,6 +445,11 @@ export const ORDER_FLOW_CONFIG = defineWorkflow({
         fromState: "REFUND_IN_PROGRESS",
         eventId: "REFUND_CANCELED_IN_PENDING_REVIEW",
         toState: "PENDING_REVIEW",
+      },
+      {
+        fromState: "REFUND_IN_PROGRESS",
+        eventId: "REFUND_CANCELED_IN_IN_REVIEW",
+        toState: "IN_REVIEW",
       },
       {
         fromState: "REFUND_IN_PROGRESS",

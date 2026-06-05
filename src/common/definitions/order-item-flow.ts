@@ -17,6 +17,11 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       eventId: "PAID_CONFIRMED",
     },
     {
+      icon: "👀",
+      name: "Start Review",
+      eventId: "REVIEW_STARTED",
+    },
+    {
       icon: "✅",
       name: "Review Order",
       eventId: "ADMIN_REVIEWED",
@@ -77,13 +82,29 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
         progress: 20,
         actions: [
           {
+            icon: "👀",
+            label: "Start Review",
+            eventId: "REVIEW_STARTED",
+            variant: "blueSecondary",
+          },
+        ],
+        description: "Payment received. Awaiting admin review.",
+        requiredRoles: ["admin"],
+        escalations: [],
+      },
+      {
+        label: "In Review",
+        state: "IN_REVIEW",
+        progress: 25,
+        actions: [
+          {
             icon: "✅",
             label: "Review Order",
             eventId: "ADMIN_REVIEWED",
             variant: "blueSecondary",
           },
         ],
-        description: "Payment received. Awaiting admin review.",
+        description: "Admin is currently reviewing the order.",
         requiredRoles: ["admin"],
         escalations: [],
       },
@@ -188,6 +209,11 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
     transitions: [
       {
         fromState: "PENDING_REVIEW",
+        eventId: "REVIEW_STARTED",
+        toState: "IN_REVIEW",
+      },
+      {
+        fromState: "IN_REVIEW",
         eventId: "ADMIN_REVIEWED",
         toState: "REVIEWED",
       },
