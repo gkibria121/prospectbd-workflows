@@ -184,6 +184,7 @@ export const DispatchSimulatedEventSchema = z.object({
   alertId: z.string(),
   payload: z.record(z.string(), z.any()),
   recipientUsers: z.array(z.string()).optional(),
+  channels: NotificationChannelsSchema.optional(),
 });
 export type DispatchSimulatedEvent = z.infer<
   typeof DispatchSimulatedEventSchema
