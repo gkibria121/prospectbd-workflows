@@ -13,11 +13,11 @@ export type AlertSeverity = z.infer<typeof AlertSeveritySchema>;
 // ─── Notification Channels ───────────────────────────────────────────────────
 
 export const NotificationChannelsSchema = z.object({
-  email: z.boolean(),
-  sms: z.boolean(),
-  push: z.boolean(),
-  slack: z.boolean(),
-  inApp: z.boolean(),
+  email: z.boolean().default(false),
+  sms: z.boolean().default(false),
+  push: z.boolean().default(true),
+  slack: z.boolean().default(false),
+  inApp: z.boolean().default(true),
 });
 export type NotificationChannels = z.infer<typeof NotificationChannelsSchema>;
 
@@ -87,7 +87,13 @@ export type StatusType = z.infer<typeof AlertStatusSchema>;
 export const AlertTabSchema = z.enum(["logs", "sandbox"]);
 export type AlertTab = z.infer<typeof AlertTabSchema>;
 
-export const AlertChannelSchema = z.enum(["EMAIL", "PUSH", "SLACK", "SMS", "IN_APP"]);
+export const AlertChannelSchema = z.enum([
+  "EMAIL",
+  "PUSH",
+  "SLACK",
+  "SMS",
+  "IN_APP",
+]);
 export type AlertChannel = z.infer<typeof AlertChannelSchema>;
 
 // ─── AlertLog ────────────────────────────────────────────────────────────────
