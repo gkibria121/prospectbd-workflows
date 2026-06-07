@@ -112,7 +112,7 @@ function createTestConfig(
         severity: "WARNING",
         roles: ["admin"],
         template: "Test SLA",
-        channels: { email: true, sms: false, push: false, slack: false },
+        channels: { email: true, sms: false, push: false, slack: false, inApp: true },
         deduplicate: false,
       },
       {
@@ -121,7 +121,7 @@ function createTestConfig(
         severity: "WARNING",
         roles: ["admin"],
         template: "Test SLA",
-        channels: { email: true, sms: false, push: false, slack: false },
+        channels: { email: true, sms: false, push: false, slack: false, inApp: true },
         deduplicate: false,
       },
     ],

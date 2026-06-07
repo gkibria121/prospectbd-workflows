@@ -49,6 +49,7 @@ export const REFUND_FLOW_CONFIG = defineWorkflow({
         sms: false,
         push: true,
         slack: true,
+      inApp: true,
       },
       roles: ["admin"],
       template:

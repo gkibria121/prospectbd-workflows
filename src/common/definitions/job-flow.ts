@@ -38,7 +38,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Artwork Job Not Accepted Escalation",
       id: "artwork-job-not-accepted",
       severity: "WARNING",
-      channels: { email: true, sms: false, push: false, slack: true },
+      channels: { email: true, sms: false, push: false, slack: true, inApp: true },
       roles: ["artwork-designer"],
       template:
         "Warning: Artwork job {jobNo} for Order {orderNo} has not been accepted within the {timeLimit} minutes SLA threshold.",
@@ -48,7 +48,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Production Job Not Accepted Pager",
       id: "production-job-not-accepted",
       severity: "CRITICAL",
-      channels: { email: false, sms: true, push: true, slack: true },
+      channels: { email: false, sms: true, push: true, slack: true, inApp: true },
       roles: ["admin"],
       template:
         "CRITICAL: Production job {jobNo} for Order {orderNo} has not been accepted by any floor manager after {timeLimit} minutes.",
@@ -58,7 +58,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Delivery Job Not Accepted Warning",
       id: "delivery-job-not-accepted",
       severity: "WARNING",
-      channels: { email: false, sms: true, push: true, slack: false },
+      channels: { email: false, sms: true, push: true, slack: false, inApp: true },
       roles: ["admin", "delivery-person"],
       template:
         "Warning: Dispatch Delivery job {jobNo} for Order {orderNo} has not been accepted by any driver after {timeLimit} minutes.",
@@ -68,7 +68,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Artwork Job Expired/Rejected Alert",
       id: "artwork-job-expired-rejected",
       severity: "CRITICAL",
-      channels: { email: true, sms: true, push: true, slack: true },
+      channels: { email: true, sms: true, push: true, slack: true, inApp: true },
       roles: ["admin", "artwork-designer"],
       template:
         "CRITICAL: Artwork job {jobNo} for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",
@@ -78,7 +78,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Production Job Expired/Rejected Alert",
       id: "production-job-expired-rejected",
       severity: "CRITICAL",
-      channels: { email: true, sms: true, push: true, slack: true },
+      channels: { email: true, sms: true, push: true, slack: true, inApp: true },
       roles: ["admin"],
       template:
         "CRITICAL: Production job {jobNo} ({jobType}) for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",
@@ -88,7 +88,7 @@ export const JOB_FLOW_CONFIG = defineWorkflow({
       name: "Delivery Job Expired/Rejected Alert",
       id: "delivery-job-expired-rejected",
       severity: "CRITICAL",
-      channels: { email: true, sms: true, push: true, slack: true },
+      channels: { email: true, sms: true, push: true, slack: true, inApp: true },
       roles: ["admin", "delivery-person"],
       template:
         "CRITICAL: Delivery job {jobNo} for Order {orderNo} has been {action} (Expired/Rejected). Reason: {reason}.",

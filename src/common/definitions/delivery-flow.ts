@@ -16,7 +16,7 @@ export const DELIVERY_FLOW_CONFIG = defineWorkflow({
       name: "Critical Delivery Delay Tracker",
       id: "delivery-overdue",
       severity: "CRITICAL",
-      channels: { email: true, sms: true, push: true, slack: false },
+      channels: { email: true, sms: true, push: true, slack: false, inApp: true },
       roles: ["admin", "delivery-person"],
       template:
         "CRITICAL: Order {orderId} is overdue for delivery. Assigned driver: {driverName}. Expected arrival was {expectedTime}.",

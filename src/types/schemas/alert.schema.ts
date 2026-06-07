@@ -17,6 +17,7 @@ export const NotificationChannelsSchema = z.object({
   sms: z.boolean(),
   push: z.boolean(),
   slack: z.boolean(),
+  inApp: z.boolean(),
 });
 export type NotificationChannels = z.infer<typeof NotificationChannelsSchema>;
 
@@ -86,7 +87,7 @@ export type StatusType = z.infer<typeof AlertStatusSchema>;
 export const AlertTabSchema = z.enum(["logs", "sandbox"]);
 export type AlertTab = z.infer<typeof AlertTabSchema>;
 
-export const AlertChannelSchema = z.enum(["EMAIL", "PUSH", "SLACK", "SMS"]);
+export const AlertChannelSchema = z.enum(["EMAIL", "PUSH", "SLACK", "SMS", "IN_APP"]);
 export type AlertChannel = z.infer<typeof AlertChannelSchema>;
 
 // ─── AlertLog ────────────────────────────────────────────────────────────────
