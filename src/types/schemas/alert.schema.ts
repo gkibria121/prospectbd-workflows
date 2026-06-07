@@ -110,6 +110,7 @@ export const AlertLogSchema = z.object({
   acknowledgedBy: userSchema.optional(),
   resolvedAt: z.string().optional(),
   resolvedBy: userSchema.optional(),
+  note: z.string().optional(),
   triggerCount: z.number(),
   metadata: z
     .object({
@@ -177,6 +178,7 @@ export type CreateAlertConfig = z.infer<typeof CreateAlertConfigSchema>;
 
 export const UpdateAlertLogStatusSchema = z.object({
   status: AlertStatusSchema,
+  note: z.string().optional(),
 });
 export type UpdateAlertLogStatus = z.infer<typeof UpdateAlertLogStatusSchema>;
 
