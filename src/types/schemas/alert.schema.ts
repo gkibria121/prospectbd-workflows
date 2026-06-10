@@ -33,6 +33,7 @@ export const AlertConfigBaseSchema = z.object({
   channels: NotificationChannelsSchema,
   roles: z.array(UserRoleSchema).min(1, "Minimum one role must be specified."),
   template: z.string(),
+  deepLink: z.string().optional(),
   deduplicate: z.boolean(),
   payload: z
     .object({
@@ -49,17 +50,22 @@ export const AlertPayloadSchema = AlertConfigBaseSchema.superRefine(
     const templateKeys = [...data.template.matchAll(/\{(\w+)\}/g)].map(
       (m) => m[1],
     );
+    const deepLinkKeys = data.deepLink
+      ? [...data.deepLink.matchAll(/\{(\w+)\}/g)].map((m) => m[1])
+      : [];
 
-    if (templateKeys.length === 0) return;
+    const allKeys = Array.from(new Set([...templateKeys, ...deepLinkKeys]));
+
+    if (allKeys.length === 0) return;
 
     const payloadKeys = new Set(Object.keys(data.payload ?? {}));
 
-    for (const key of templateKeys) {
+    for (const key of allKeys) {
       if (!payloadKeys.has(key)) {
         ctx.addIssue({
           code: "custom",
           path: ["payload"],
-          message: `Template references key "{${key}}" but it is missing from payload`,
+          message: `Template or DeepLink references key "{${key}}" but it is missing from payload`,
         });
       }
     }
