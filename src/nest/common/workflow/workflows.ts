@@ -198,14 +198,23 @@ async function handleEscalations(
       .map((e) => {
         let deadlineVal: number;
         if (e.deadline !== undefined) {
-          const deadlineField = e.deadline;
-          const dataVal = state.data[deadlineField];
-          const dateStr = typeof dataVal === "string" ? dataVal : deadlineField;
-          const parsed = Date.parse(dateStr);
-          if (!isNaN(parsed)) {
-            deadlineVal = parsed;
+          if (e.deadline instanceof Date) {
+            deadlineVal = e.deadline.getTime();
           } else {
-            deadlineVal = Infinity;
+            const deadlineField = e.deadline;
+            const dataVal = state.data[deadlineField];
+            const finalVal = dataVal !== undefined ? dataVal : deadlineField;
+            if (finalVal instanceof Date) {
+              deadlineVal = finalVal.getTime();
+            } else {
+              const dateStr = typeof finalVal === "string" ? finalVal : String(finalVal);
+              const parsed = Date.parse(dateStr);
+              if (!isNaN(parsed)) {
+                deadlineVal = parsed;
+              } else {
+                deadlineVal = Infinity;
+              }
+            }
           }
         } else if (e.after !== undefined) {
           deadlineVal = e.baseTime + durationToMs(e.after.duration, e.after.unit);

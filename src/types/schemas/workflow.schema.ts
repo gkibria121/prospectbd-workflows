@@ -23,7 +23,7 @@ export const EscalationTime = z.object({
       unit: z.enum(["minutes", "hours", "days"]),
     })
     .optional(),
-  deadline: z.string().optional(),
+  deadline: z.union([z.string(), z.date()]).optional(),
 });
 
 export const EscalationSchema = z
