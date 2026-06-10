@@ -195,14 +195,39 @@ async function handleEscalations(
     // 2. Find the earliest escalation
     const now = new Date().getTime();
     const withDeadlines = activeEscalations
-      .map((e) => ({
-        ...e,
-        deadline: e.baseTime + durationToMs(e.after.duration, e.after.unit),
-      }))
-      .sort((a, b) => a.deadline - b.deadline);
+      .map((e) => {
+        let deadlineVal: number;
+        if (e.deadline !== undefined) {
+          const deadlineField = e.deadline;
+          const dataVal = state.data[deadlineField];
+          const dateStr = typeof dataVal === "string" ? dataVal : deadlineField;
+          const parsed = Date.parse(dateStr);
+          if (!isNaN(parsed)) {
+            deadlineVal = parsed;
+          } else {
+            deadlineVal = Infinity;
+          }
+        } else if (e.after !== undefined) {
+          deadlineVal = e.baseTime + durationToMs(e.after.duration, e.after.unit);
+        } else {
+          deadlineVal = Infinity;
+        }
+        return {
+          ...e,
+          resolvedDeadline: deadlineVal,
+        };
+      })
+      .filter((e) => e.resolvedDeadline !== Infinity)
+      .sort((a, b) => a.resolvedDeadline - b.resolvedDeadline);
+
+    if (withDeadlines.length === 0) {
+      await condition(() => state.currentStateId !== frozenStateId);
+
+      break;
+    }
 
     const nextEscalation = withDeadlines[0];
-    const waitMs = Math.max(0, nextEscalation.deadline - now);
+    const waitMs = Math.max(0, nextEscalation.resolvedDeadline - now);
 
     const stateChanged = () => state.currentStateId !== frozenStateId;
     const resolved = await condition(stateChanged, waitMs);
@@ -233,14 +258,25 @@ async function handleEscalations(
         );
 
         if (alertConfig) {
+          let duration = 0;
+          let unit: "minutes" | "hours" | "days" = "minutes";
+          if (nextEscalation.after !== undefined) {
+            duration = nextEscalation.after.duration;
+            unit = nextEscalation.after.unit;
+          } else if (nextEscalation.deadline !== undefined) {
+            const diffMs = Math.max(0, nextEscalation.resolvedDeadline - nextEscalation.baseTime);
+            duration = Math.round(diffMs / 60_000);
+            unit = "minutes";
+          }
+
           await sendEscalationAlert({
             definitionName: config.definitionName,
             resourceId: config.workflowId!,
             resourceType: config.resourceType,
             alertRuleId: nextEscalation.id,
-            duration: nextEscalation.after.duration,
-            durationUnit: nextEscalation.after.unit,
-            unit: nextEscalation.after.unit,
+            duration,
+            durationUnit: unit,
+            unit,
             firedAt: new Date().toISOString(),
             action: "sla_escalation",
             data: state.data,

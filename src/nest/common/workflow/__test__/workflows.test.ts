@@ -887,4 +887,77 @@ describe("Temporal workflow()", () => {
     });
     expect(result.history[0].data).toHaveProperty("timestamp");
   });
+
+  it("fires deadline-based escalation when deadline is a static ISO string", async () => {
+    const deadlineTime = new Date(Date.now() + 60000).toISOString();
+    const config = createTestConfig({
+      stateMachine: {
+        ...createTestConfig().stateMachine,
+        escalations: [
+          {
+            id: "esc-deadline-static",
+            deadline: deadlineTime,
+            actionType: "raise-event",
+            eventId: "expired",
+          },
+        ],
+      },
+    });
+
+    forceConditionTimeout = true;
+    const result = await workflow(config);
+    expect(result.currentState?.state).toBe("expired-state");
+  });
+
+  it("fires deadline-based escalation when deadline is a field reference in state data", async () => {
+    const config = createTestConfig();
+    const pendingState = config.stateMachine.states.find(
+      (s) => s.state === "pending",
+    )!;
+    pendingState.escalations = [
+      {
+        id: "test-alert",
+        deadline: "expectedDeliveryTime",
+        actionType: "send-sla",
+      },
+    ];
+
+    const deadlineTime = new Date(Date.now() + 120000).toISOString();
+    const workflowPromise = workflow(config, { expectedDeliveryTime: deadlineTime });
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    forceConditionTimeout = true;
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(mockSendEscalationAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertRuleId: "test-alert",
+        duration: expect.any(Number),
+        unit: "minutes",
+      }),
+    );
+
+    const signal = getSignalHandler();
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "confirm",
+      data: {},
+      userRoles: ["customer"],
+    });
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "complete",
+      data: {},
+      userRoles: ["admin"],
+    });
+    notifyCondition();
+
+    const result = await workflowPromise;
+    expect(result.currentState?.state).toBe("completed");
+  });
 });

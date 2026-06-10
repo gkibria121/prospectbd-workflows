@@ -15,25 +15,44 @@ export const WorkFlowActionButtonSchema = z.object({
 
 export type WorkflowAction = z.infer<typeof WorkFlowActionButtonSchema>;
 
-export const EscalationSchema = z.discriminatedUnion("actionType", [
-  z.object({
-    id: z.string(),
-    after: z.object({
+export const EscalationTimeUnitEnum = z.enum(["minutes", "hours", "days"]);
+export const EscalationTime = z.object({
+  after: z
+    .object({
       duration: z.number(),
       unit: z.enum(["minutes", "hours", "days"]),
-    }),
-    actionType: z.literal("raise-event"),
-    eventId: z.string(),
-  }),
-  z.object({
-    id: z.string(), // references AlertConfig.id
-    after: z.object({
-      duration: z.number(),
-      unit: z.enum(["minutes", "hours", "days"]),
-    }),
-    actionType: z.literal("send-sla"),
-  }),
-]);
+    })
+    .optional(),
+  deadline: z.string().optional(),
+});
+
+export const EscalationSchema = z
+  .discriminatedUnion("actionType", [
+    z
+      .object({
+        id: z.string(),
+        actionType: z.literal("raise-event"),
+        eventId: z.string(),
+      })
+      .extend(EscalationTime.shape),
+    z
+      .object({
+        id: z.string(), // references AlertConfig.id
+        actionType: z.literal("send-sla"),
+      })
+      .extend(EscalationTime.shape),
+  ])
+  .superRefine((data, ctx) => {
+    const hasAfter = data.after !== undefined;
+    const hasDeadline = data.deadline !== undefined;
+    if (hasAfter === hasDeadline) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["after"],
+        message: "Either 'after' or 'deadline' must be provided, but not both.",
+      });
+    }
+  });
 
 export type WorkflowEscalation = z.infer<typeof EscalationSchema>;
 
