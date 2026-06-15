@@ -35,7 +35,20 @@ interface WorkflowState {
   lastEventId: string | null;
   data: Record<string, unknown>;
   history: WorkflowInstance["history"];
-  triggeredEscalations: string[];
+  /**
+   * Tracks fired escalations by a composite key:
+   *   `${level}:${stateId}:${occurrenceIndex}`
+   *
+   * Using occurrence index (position in the source array) rather than
+   * escalation ID means the same alert ID can appear multiple times in
+   * the same state and each entry is tracked independently.
+   *
+   * Examples:
+   *   "step:awaiting_payment:0"   – first escalation in that state
+   *   "step:awaiting_payment:1"   – second escalation (even if same id)
+   *   "global:__root__:0"         – first global escalation
+   */
+  triggeredEscalations: Set<string>;
   startTime: string;
   stateEntryTime: string;
 }
@@ -45,6 +58,11 @@ type ActiveEscalation = NonNullable<
 >[number] & {
   baseTime: number;
   level: "step" | "global";
+  /**
+   * Stable composite key that uniquely identifies this occurrence,
+   * regardless of whether the escalation id is shared with another entry.
+   */
+  occurrenceKey: string;
 };
 
 type EscalationWithDeadline = ActiveEscalation & {
@@ -218,24 +236,29 @@ async function handleEscalations(
   while (true) {
     const frozenStateId = state.currentStateId;
 
-    // 1. Collect active (un-triggered) escalations for the current state
+    // 1. Collect active (un-triggered) escalations for the current state.
+    //    Composite key format: `${level}:${stateId}:${index}`
+    //    The index is the position within the source array, making it stable
+    //    and unique even when the same alert id appears more than once.
     const stepEscalations =
       config.stateMachine.states.find((s) => s.state === frozenStateId)
         ?.escalations ?? [];
     const globalEscalations = config.stateMachine.escalations ?? [];
 
     const activeEscalations: ActiveEscalation[] = [
-      ...stepEscalations.map((e) => ({
+      ...stepEscalations.map((e, idx) => ({
         ...e,
         baseTime: stateEntryTime,
         level: "step" as const,
+        occurrenceKey: `step:${frozenStateId}:${idx}`,
       })),
-      ...globalEscalations.map((e) => ({
+      ...globalEscalations.map((e, idx) => ({
         ...e,
         baseTime: workflowStartTime,
         level: "global" as const,
+        occurrenceKey: `global:__root__:${idx}`,
       })),
-    ].filter((e) => !state.triggeredEscalations.includes(e.id));
+    ].filter((e) => !state.triggeredEscalations.has(e.occurrenceKey));
 
     if (activeEscalations.length === 0) {
       await condition(() => state.currentStateId !== frozenStateId);
@@ -270,7 +293,8 @@ async function handleEscalations(
 
     // 3. Timed out — fire the escalation
     if (!resolved) {
-      state.triggeredEscalations.push(nextEscalation.id);
+      // Mark as triggered using the occurrence key, not the alert id
+      state.triggeredEscalations.add(nextEscalation.occurrenceKey);
 
       if (nextEscalation.actionType === "raise-event") {
         applyTransition(config, state, {
@@ -343,7 +367,7 @@ export async function workflow(
     lastEventId: null,
     data: { ...initialData },
     history: [],
-    triggeredEscalations: [],
+    triggeredEscalations: new Set<string>(),
     startTime,
     stateEntryTime: startTime,
   };
