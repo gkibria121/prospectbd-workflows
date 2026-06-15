@@ -38,7 +38,6 @@ interface WorkflowState {
   triggeredEscalations: string[];
   startTime: string;
   stateEntryTime: string;
-  escalationFiredTimes?: Record<string, number>;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -126,16 +125,6 @@ function applyTransition(
 
   state.currentStateId = toStep;
   state.stateEntryTime = now;
-  if (state.escalationFiredTimes) {
-    const globalIds = new Set(
-      (config.stateMachine.escalations ?? []).map((e) => e.id),
-    );
-    for (const key of Object.keys(state.escalationFiredTimes)) {
-      if (!globalIds.has(key)) {
-        delete state.escalationFiredTimes[key];
-      }
-    }
-  }
   state.lastEventId = fullEventId;
   state.data = { ...state.data, ...eventData };
 
@@ -174,6 +163,7 @@ async function handleEscalations(
   );
 */
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const frozenStateId = state.currentStateId;
 
@@ -207,42 +197,32 @@ async function handleEscalations(
     const withDeadlines = activeEscalations
       .map((e) => {
         let deadlineVal: number;
-        let origDeadlineVal: number;
         if (e.deadline !== undefined) {
           if (e.deadline instanceof Date) {
-            origDeadlineVal = e.deadline.getTime();
+            deadlineVal = e.deadline.getTime();
           } else {
             const deadlineField = e.deadline;
             const dataVal = state.data[deadlineField];
             const finalVal = dataVal !== undefined ? dataVal : deadlineField;
             if (finalVal instanceof Date) {
-              origDeadlineVal = finalVal.getTime();
+              deadlineVal = finalVal.getTime();
             } else {
               const dateStr =
                 typeof finalVal === "string" ? finalVal : String(finalVal);
               const parsed = Date.parse(dateStr);
               if (!isNaN(parsed)) {
-                origDeadlineVal = parsed;
+                deadlineVal = parsed;
               } else {
-                origDeadlineVal = Infinity;
+                deadlineVal = Infinity;
               }
             }
           }
         } else if (e.after !== undefined) {
-          origDeadlineVal =
+          deadlineVal =
             e.baseTime + durationToMs(e.after.duration, e.after.unit);
         } else {
-          origDeadlineVal = Infinity;
+          deadlineVal = Infinity;
         }
-
-        const lastFired = state.escalationFiredTimes?.[e.id];
-        if (lastFired !== undefined && origDeadlineVal !== Infinity) {
-          const durationMs = Math.max(0, origDeadlineVal - e.baseTime);
-          deadlineVal = lastFired + durationMs;
-        } else {
-          deadlineVal = origDeadlineVal;
-        }
-
         return {
           ...e,
           resolvedDeadline: deadlineVal,
@@ -269,11 +249,9 @@ async function handleEscalations(
 
     // 3. Timed out — Fire escalation
     if (!resolved) {
-      if (nextEscalation.actionType === "raise-event") {
-        // Mark raise-event escalations as triggered — they cause a state
-        // transition and must not fire again for the same state.
-        state.triggeredEscalations.push(nextEscalation.id);
+      state.triggeredEscalations.push(nextEscalation.id);
 
+      if (nextEscalation.actionType === "raise-event") {
         applyTransition(config, state, {
           workflowId: config.workflowId!,
           eventId: nextEscalation.eventId,
@@ -293,20 +271,14 @@ async function handleEscalations(
         if (alertConfig) {
           let duration = 0;
           let unit: "minutes" | "hours" | "days" = "minutes";
-          const diffMs = Math.max(
-            0,
-            nextEscalation.resolvedDeadline - nextEscalation.baseTime,
-          );
           if (nextEscalation.after !== undefined) {
-            if (nextEscalation.after.unit === "minutes") {
-              duration = Math.round(diffMs / 60_000);
-            } else if (nextEscalation.after.unit === "hours") {
-              duration = Math.round(diffMs / 3_600_000);
-            } else if (nextEscalation.after.unit === "days") {
-              duration = Math.round(diffMs / 86_400_000);
-            }
+            duration = nextEscalation.after.duration;
             unit = nextEscalation.after.unit;
           } else if (nextEscalation.deadline !== undefined) {
+            const diffMs = Math.max(
+              0,
+              nextEscalation.resolvedDeadline - nextEscalation.baseTime,
+            );
             duration = Math.round(diffMs / 60_000);
             unit = "minutes";
           }
@@ -324,15 +296,6 @@ async function handleEscalations(
             data: state.data,
             alertConfig,
           });
-
-          if (alertConfig.deduplicate !== true) {
-            state.triggeredEscalations.push(nextEscalation.id);
-          } else {
-            if (!state.escalationFiredTimes) {
-              state.escalationFiredTimes = {};
-            }
-            state.escalationFiredTimes[nextEscalation.id] = new Date().getTime();
-          }
         }
       }
 
@@ -361,7 +324,6 @@ export async function workflow(
     triggeredEscalations: [],
     startTime: startTime,
     stateEntryTime: startTime,
-    escalationFiredTimes: {},
   };
 
   const getInstance = () => buildInstance(config, state);
