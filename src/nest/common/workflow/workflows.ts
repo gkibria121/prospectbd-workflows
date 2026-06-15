@@ -163,7 +163,6 @@ async function handleEscalations(
   );
 */
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const frozenStateId = state.currentStateId;
 
@@ -207,7 +206,8 @@ async function handleEscalations(
             if (finalVal instanceof Date) {
               deadlineVal = finalVal.getTime();
             } else {
-              const dateStr = typeof finalVal === "string" ? finalVal : String(finalVal);
+              const dateStr =
+                typeof finalVal === "string" ? finalVal : String(finalVal);
               const parsed = Date.parse(dateStr);
               if (!isNaN(parsed)) {
                 deadlineVal = parsed;
@@ -217,7 +217,8 @@ async function handleEscalations(
             }
           }
         } else if (e.after !== undefined) {
-          deadlineVal = e.baseTime + durationToMs(e.after.duration, e.after.unit);
+          deadlineVal =
+            e.baseTime + durationToMs(e.after.duration, e.after.unit);
         } else {
           deadlineVal = Infinity;
         }
@@ -247,9 +248,11 @@ async function handleEscalations(
 
     // 3. Timed out — Fire escalation
     if (!resolved) {
-      state.triggeredEscalations.push(nextEscalation.id);
-
       if (nextEscalation.actionType === "raise-event") {
+        // Mark raise-event escalations as triggered — they cause a state
+        // transition and must not fire again for the same state.
+        state.triggeredEscalations.push(nextEscalation.id);
+
         applyTransition(config, state, {
           workflowId: config.workflowId!,
           eventId: nextEscalation.eventId,
@@ -262,6 +265,12 @@ async function handleEscalations(
           userRoles: ["admin"], // System triggered
         });
       } else if (nextEscalation.actionType === "send-sla") {
+        // NOTE: send-sla escalations are intentionally NOT added to
+        // triggeredEscalations. This allows them to re-fire on each
+        // threshold interval until the workflow state transitions
+        // (i.e., the SLA breach is resolved). The AlertService's
+        // deduplication logic handles stacking/escalation of the
+        // repeated notifications.
         const alertConfig = config.alerts?.find(
           (a) => a.id === nextEscalation.id,
         );
@@ -273,7 +282,10 @@ async function handleEscalations(
             duration = nextEscalation.after.duration;
             unit = nextEscalation.after.unit;
           } else if (nextEscalation.deadline !== undefined) {
-            const diffMs = Math.max(0, nextEscalation.resolvedDeadline - nextEscalation.baseTime);
+            const diffMs = Math.max(
+              0,
+              nextEscalation.resolvedDeadline - nextEscalation.baseTime,
+            );
             duration = Math.round(diffMs / 60_000);
             unit = "minutes";
           }
