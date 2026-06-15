@@ -40,6 +40,17 @@ interface WorkflowState {
   stateEntryTime: string;
 }
 
+type ActiveEscalation = NonNullable<
+  WorkflowConfig["stateMachine"]["states"][number]["escalations"]
+>[number] & {
+  baseTime: number;
+  level: "step" | "global";
+};
+
+type EscalationWithDeadline = ActiveEscalation & {
+  resolvedDeadline: number;
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function buildInstance(
@@ -133,6 +144,52 @@ function applyTransition(
   );
 }
 
+// ─── Deadline Resolution ──────────────────────────────────────────────────────
+
+/**
+ * Resolves the absolute deadline timestamp (ms) for an escalation entry.
+ *
+ * Resolution order:
+ *  1. `deadline` is a Date object → use directly.
+ *  2. `deadline` is a string → treat as a key into `state.data`; fall back to
+ *     the string itself if the key is absent; parse as an ISO date string.
+ *  3. `after` is defined → baseTime + duration converted to ms.
+ *  4. Neither → `Infinity` (no deadline, escalation never fires).
+ */
+function resolveEscalationDeadline(
+  escalation: ActiveEscalation,
+  state: WorkflowState,
+): number {
+  if (escalation.deadline !== undefined) {
+    if (escalation.deadline instanceof Date) {
+      return escalation.deadline.getTime();
+    }
+
+    // Treat as a data-field key, with the raw string value as fallback
+    const deadlineField = escalation.deadline;
+    const dataVal = state.data[deadlineField];
+    const finalVal = dataVal !== undefined ? dataVal : deadlineField;
+
+    if (finalVal instanceof Date) {
+      return finalVal.getTime();
+    }
+
+    const dateStr = typeof finalVal === "string" ? finalVal : String(finalVal);
+    const parsed = Date.parse(dateStr);
+
+    return isNaN(parsed) ? Infinity : parsed;
+  }
+
+  if (escalation.after !== undefined) {
+    return (
+      escalation.baseTime +
+      durationToMs(escalation.after.duration, escalation.after.unit)
+    );
+  }
+
+  return Infinity;
+}
+
 // ─── Signal & Query Registration ─────────────────────────────────────────────
 
 function registerHandlers(
@@ -157,83 +214,47 @@ async function handleEscalations(
   const workflowStartTime = new Date(state.startTime).getTime();
   const stateEntryTime = new Date(state.stateEntryTime).getTime();
 
-  /*
-  console.log(
-    `[Workflow: ${config.definitionName}] Entered escalation loop for state "${state.currentStateId}"`,
-  );
-*/
-
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const frozenStateId = state.currentStateId;
 
-    // 1. Get all active escalations
+    // 1. Collect active (un-triggered) escalations for the current state
     const stepEscalations =
       config.stateMachine.states.find((s) => s.state === frozenStateId)
         ?.escalations ?? [];
     const globalEscalations = config.stateMachine.escalations ?? [];
 
-    const activeEscalations = [
+    const activeEscalations: ActiveEscalation[] = [
       ...stepEscalations.map((e) => ({
         ...e,
         baseTime: stateEntryTime,
-        level: "step",
+        level: "step" as const,
       })),
       ...globalEscalations.map((e) => ({
         ...e,
         baseTime: workflowStartTime,
-        level: "global",
+        level: "global" as const,
       })),
     ].filter((e) => !state.triggeredEscalations.includes(e.id));
 
     if (activeEscalations.length === 0) {
       await condition(() => state.currentStateId !== frozenStateId);
-
       break;
     }
 
-    // 2. Find the earliest escalation
-    const now = new Date().getTime();
-    const withDeadlines = activeEscalations
-      .map((e) => {
-        let deadlineVal: number;
-        if (e.deadline !== undefined) {
-          if (e.deadline instanceof Date) {
-            deadlineVal = e.deadline.getTime();
-          } else {
-            const deadlineField = e.deadline;
-            const dataVal = state.data[deadlineField];
-            const finalVal = dataVal !== undefined ? dataVal : deadlineField;
-            if (finalVal instanceof Date) {
-              deadlineVal = finalVal.getTime();
-            } else {
-              const dateStr =
-                typeof finalVal === "string" ? finalVal : String(finalVal);
-              const parsed = Date.parse(dateStr);
-              if (!isNaN(parsed)) {
-                deadlineVal = parsed;
-              } else {
-                deadlineVal = Infinity;
-              }
-            }
-          }
-        } else if (e.after !== undefined) {
-          deadlineVal =
-            e.baseTime + durationToMs(e.after.duration, e.after.unit);
-        } else {
-          deadlineVal = Infinity;
-        }
-        return {
-          ...e,
-          resolvedDeadline: deadlineVal,
-        };
-      })
+    // 2. Resolve deadlines and find the earliest upcoming escalation
+    const now = Date.now();
+
+    const withDeadlines: EscalationWithDeadline[] = activeEscalations
+      .map((e) => ({
+        ...e,
+        resolvedDeadline: resolveEscalationDeadline(e, state),
+      }))
       .filter((e) => e.resolvedDeadline !== Infinity)
       .sort((a, b) => a.resolvedDeadline - b.resolvedDeadline);
 
     if (withDeadlines.length === 0) {
       await condition(() => state.currentStateId !== frozenStateId);
-
       break;
     }
 
@@ -247,7 +268,7 @@ async function handleEscalations(
       break;
     }
 
-    // 3. Timed out — Fire escalation
+    // 3. Timed out — fire the escalation
     if (!resolved) {
       state.triggeredEscalations.push(nextEscalation.id);
 
@@ -257,11 +278,11 @@ async function handleEscalations(
           eventId: nextEscalation.eventId,
           data: {
             resourceType: config.resourceType,
-            id: config.workflowId!, // Use full ID as it is now a UUID
+            id: config.workflowId!,
             escalationId: nextEscalation.id,
             timestamp: new Date().toISOString(),
           },
-          userRoles: ["admin"], // System triggered
+          userRoles: ["admin"],
         });
       } else if (nextEscalation.actionType === "send-sla") {
         const alertConfig = config.alerts?.find(
@@ -271,6 +292,7 @@ async function handleEscalations(
         if (alertConfig) {
           let duration = 0;
           let unit: "minutes" | "hours" | "days" = "minutes";
+
           if (nextEscalation.after !== undefined) {
             duration = nextEscalation.after.duration;
             unit = nextEscalation.after.unit;
@@ -322,7 +344,7 @@ export async function workflow(
     data: { ...initialData },
     history: [],
     triggeredEscalations: [],
-    startTime: startTime,
+    startTime,
     stateEntryTime: startTime,
   };
 
@@ -344,7 +366,6 @@ export async function workflow(
       await sleep("1 second");
     }
 
-    // After transition, we always publish exactly once
     await publishEvent({
       ...getInstance(),
       event: state.lastEventId!,
