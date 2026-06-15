@@ -118,16 +118,7 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
             variant: "grayOutline",
           },
         ],
-        escalations: [
-          {
-            id: "quote-expiry-warning",
-            after: {
-              duration: 1,
-              unit: "minutes",
-            },
-            actionType: "send-sla",
-          },
-        ],
+        escalations: [],
       },
       {
         state: "ACCEPTED",
