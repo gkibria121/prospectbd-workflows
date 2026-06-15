@@ -38,6 +38,7 @@ interface WorkflowState {
   triggeredEscalations: string[];
   startTime: string;
   stateEntryTime: string;
+  escalationFiredTimes?: Record<string, number>;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -125,6 +126,16 @@ function applyTransition(
 
   state.currentStateId = toStep;
   state.stateEntryTime = now;
+  if (state.escalationFiredTimes) {
+    const globalIds = new Set(
+      (config.stateMachine.escalations ?? []).map((e) => e.id),
+    );
+    for (const key of Object.keys(state.escalationFiredTimes)) {
+      if (!globalIds.has(key)) {
+        delete state.escalationFiredTimes[key];
+      }
+    }
+  }
   state.lastEventId = fullEventId;
   state.data = { ...state.data, ...eventData };
 
@@ -196,32 +207,42 @@ async function handleEscalations(
     const withDeadlines = activeEscalations
       .map((e) => {
         let deadlineVal: number;
+        let origDeadlineVal: number;
         if (e.deadline !== undefined) {
           if (e.deadline instanceof Date) {
-            deadlineVal = e.deadline.getTime();
+            origDeadlineVal = e.deadline.getTime();
           } else {
             const deadlineField = e.deadline;
             const dataVal = state.data[deadlineField];
             const finalVal = dataVal !== undefined ? dataVal : deadlineField;
             if (finalVal instanceof Date) {
-              deadlineVal = finalVal.getTime();
+              origDeadlineVal = finalVal.getTime();
             } else {
               const dateStr =
                 typeof finalVal === "string" ? finalVal : String(finalVal);
               const parsed = Date.parse(dateStr);
               if (!isNaN(parsed)) {
-                deadlineVal = parsed;
+                origDeadlineVal = parsed;
               } else {
-                deadlineVal = Infinity;
+                origDeadlineVal = Infinity;
               }
             }
           }
         } else if (e.after !== undefined) {
-          deadlineVal =
+          origDeadlineVal =
             e.baseTime + durationToMs(e.after.duration, e.after.unit);
         } else {
-          deadlineVal = Infinity;
+          origDeadlineVal = Infinity;
         }
+
+        const lastFired = state.escalationFiredTimes?.[e.id];
+        if (lastFired !== undefined && origDeadlineVal !== Infinity) {
+          const durationMs = Math.max(0, origDeadlineVal - e.baseTime);
+          deadlineVal = lastFired + durationMs;
+        } else {
+          deadlineVal = origDeadlineVal;
+        }
+
         return {
           ...e,
           resolvedDeadline: deadlineVal,
@@ -265,12 +286,6 @@ async function handleEscalations(
           userRoles: ["admin"], // System triggered
         });
       } else if (nextEscalation.actionType === "send-sla") {
-        // NOTE: send-sla escalations are intentionally NOT added to
-        // triggeredEscalations. This allows them to re-fire on each
-        // threshold interval until the workflow state transitions
-        // (i.e., the SLA breach is resolved). The AlertService's
-        // deduplication logic handles stacking/escalation of the
-        // repeated notifications.
         const alertConfig = config.alerts?.find(
           (a) => a.id === nextEscalation.id,
         );
@@ -278,14 +293,20 @@ async function handleEscalations(
         if (alertConfig) {
           let duration = 0;
           let unit: "minutes" | "hours" | "days" = "minutes";
+          const diffMs = Math.max(
+            0,
+            nextEscalation.resolvedDeadline - nextEscalation.baseTime,
+          );
           if (nextEscalation.after !== undefined) {
-            duration = nextEscalation.after.duration;
+            if (nextEscalation.after.unit === "minutes") {
+              duration = Math.round(diffMs / 60_000);
+            } else if (nextEscalation.after.unit === "hours") {
+              duration = Math.round(diffMs / 3_600_000);
+            } else if (nextEscalation.after.unit === "days") {
+              duration = Math.round(diffMs / 86_400_000);
+            }
             unit = nextEscalation.after.unit;
           } else if (nextEscalation.deadline !== undefined) {
-            const diffMs = Math.max(
-              0,
-              nextEscalation.resolvedDeadline - nextEscalation.baseTime,
-            );
             duration = Math.round(diffMs / 60_000);
             unit = "minutes";
           }
@@ -303,6 +324,15 @@ async function handleEscalations(
             data: state.data,
             alertConfig,
           });
+
+          if (alertConfig.deduplicate !== true) {
+            state.triggeredEscalations.push(nextEscalation.id);
+          } else {
+            if (!state.escalationFiredTimes) {
+              state.escalationFiredTimes = {};
+            }
+            state.escalationFiredTimes[nextEscalation.id] = new Date().getTime();
+          }
         }
       }
 
@@ -331,6 +361,7 @@ export async function workflow(
     triggeredEscalations: [],
     startTime: startTime,
     stateEntryTime: startTime,
+    escalationFiredTimes: {},
   };
 
   const getInstance = () => buildInstance(config, state);

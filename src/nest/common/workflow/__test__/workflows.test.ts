@@ -112,7 +112,13 @@ function createTestConfig(
         severity: "WARNING",
         roles: ["admin"],
         template: "Test SLA",
-        channels: { email: true, sms: false, push: false, slack: false, inApp: true },
+        channels: {
+          email: true,
+          sms: false,
+          push: false,
+          slack: false,
+          inApp: true,
+        },
         deduplicate: false,
       },
       {
@@ -121,7 +127,13 @@ function createTestConfig(
         severity: "WARNING",
         roles: ["admin"],
         template: "Test SLA",
-        channels: { email: true, sms: false, push: false, slack: false, inApp: true },
+        channels: {
+          email: true,
+          sms: false,
+          push: false,
+          slack: false,
+          inApp: true,
+        },
         deduplicate: false,
       },
     ],
@@ -177,7 +189,6 @@ function createTestConfig(
         },
       ],
       transitions: [
-
         { fromState: "pending", toState: "confirmed", eventId: "confirm" },
         { fromState: "confirmed", toState: "completed", eventId: "complete" },
         { fromState: "pending", toState: "expired-state", eventId: "expired" },
@@ -782,6 +793,61 @@ describe("Temporal workflow()", () => {
     expect(result.currentState?.state).toBe("completed");
   });
 
+  it("re-fires send-sla escalations on threshold interval when deduplicate is true", async () => {
+    const config = createTestConfig();
+    const alertConfig = config.alerts?.find((a) => a.id === "test-alert");
+    alertConfig.deduplicate = true;
+
+    const pendingState = config.stateMachine.states.find(
+      (s) => s.state === "pending",
+    )!;
+    pendingState.escalations = [
+      {
+        id: "test-alert",
+        after: { duration: 5, unit: "minutes" },
+        actionType: "send-sla",
+      },
+    ];
+
+    const workflowPromise = workflow(config);
+    await new Promise((r) => setTimeout(r, 10));
+
+    // 1. Fire escalation first time
+    forceConditionTimeout = true;
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(mockSendEscalationAlert).toHaveBeenCalledTimes(1);
+
+    // 2. Simulate another timeout in the same state (should fire again)
+    forceConditionTimeout = true;
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+
+    // Should now have fired twice
+    expect(mockSendEscalationAlert).toHaveBeenCalledTimes(2);
+
+    // Complete workflow
+    const signal = getSignalHandler();
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "confirm",
+      data: {},
+      userRoles: ["customer"],
+    });
+    notifyCondition();
+    await new Promise((r) => setTimeout(r, 10));
+    signal({
+      workflowId: config.workflowId!,
+      eventId: "complete",
+      data: {},
+      userRoles: ["admin"],
+    });
+    notifyCondition();
+
+    const result = await workflowPromise;
+    expect(result.currentState?.state).toBe("completed");
+  });
+
   it("does not fire send-sla escalation if alert rule is missing in config", async () => {
     const config = createTestConfig();
     const pendingState = config.stateMachine.states.find(
@@ -823,7 +889,7 @@ describe("Temporal workflow()", () => {
       userRoles: ["admin"],
     });
     notifyCondition();
-    
+
     await workflowPromise;
   });
 
@@ -852,7 +918,7 @@ describe("Temporal workflow()", () => {
       userRoles: ["admin"],
     });
     notifyCondition();
-    
+
     const result = await workflowPromise;
     expect(result.history[0].eventId).toBe(`${config.definitionName}.confirm`);
   });
@@ -923,7 +989,9 @@ describe("Temporal workflow()", () => {
     ];
 
     const deadlineTime = new Date(Date.now() + 120000).toISOString();
-    const workflowPromise = workflow(config, { expectedDeliveryTime: deadlineTime });
+    const workflowPromise = workflow(config, {
+      expectedDeliveryTime: deadlineTime,
+    });
 
     await new Promise((r) => setTimeout(r, 10));
 
@@ -996,7 +1064,9 @@ describe("Temporal workflow()", () => {
     ];
 
     const deadlineTime = new Date(Date.now() + 120000);
-    const workflowPromise = workflow(config, { expectedDeliveryTime: deadlineTime });
+    const workflowPromise = workflow(config, {
+      expectedDeliveryTime: deadlineTime,
+    });
 
     await new Promise((r) => setTimeout(r, 10));
 
