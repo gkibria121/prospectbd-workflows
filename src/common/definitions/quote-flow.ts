@@ -10,12 +10,6 @@ export const QUOTE_FLOW_CONFIG = defineWorkflow({
       eventId: "SENT_TO_CUSTOMER",
       name: "Send Quote",
       icon: "📤",
-      schema: z.object({
-        quoteId: z.string(),
-        quoteNo: z.string(),
-        timestamp: z.string(),
-        type: z.literal("quote-notification"),
-      }),
     },
     { eventId: "EDITED", name: "Edit Quote", icon: "✏️" },
     {

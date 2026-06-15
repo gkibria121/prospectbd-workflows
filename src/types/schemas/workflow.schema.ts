@@ -39,6 +39,7 @@ export const EscalationSchema = z
       .object({
         id: z.string(), // references AlertConfig.id
         actionType: z.literal("send-sla"),
+        retrigger: z.boolean().optional(),
       })
       .extend(EscalationTime.shape),
   ])

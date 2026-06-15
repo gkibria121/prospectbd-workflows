@@ -15,8 +15,8 @@ export abstract class IAlert<TContext = any> {
     return alert;
   }
 
-  getEscalation(
-    trigger: IAlert<TContext>["trigger"],
+  getEscalation<T = IAlert<TContext>["trigger"]>(
+    trigger: T,
   ): WorkflowEscalation & { alertRule: AlertConfig } {
     this.trigger = trigger;
     return {
@@ -24,7 +24,7 @@ export abstract class IAlert<TContext = any> {
       id: this.alert.id,
       alertRule: this.alert,
       actionType: "send-sla",
-    } as WorkflowEscalation & { alertRule: AlertConfig };
+    } as WorkflowEscalation & { alertRule: AlertConfig } & T;
   }
 
   public async shouldProcess(
