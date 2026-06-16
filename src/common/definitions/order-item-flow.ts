@@ -21,16 +21,7 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       name: "Start Review",
       eventId: "REVIEW_STARTED",
     },
-    {
-      icon: "✅",
-      name: "Review Order",
-      eventId: "ADMIN_REVIEWED",
-      schema: z.object({
-        orderId: z.string(),
-        orderNo: z.string(),
-        timestamp: z.string(),
-      }),
-    },
+
     {
       icon: "⚙️",
       name: "Start Production",
@@ -98,30 +89,14 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
         progress: 25,
         actions: [
           {
-            icon: "✅",
-            label: "Review Order",
-            eventId: "ADMIN_REVIEWED",
-            variant: "blueSecondary",
-          },
-        ],
-        description: "Admin is currently reviewing the order.",
-        requiredRoles: ["admin"],
-        escalations: [],
-      },
-      {
-        label: "Reviewed",
-        progress: 30,
-        state: "REVIEWED",
-        actions: [
-          {
             icon: "⚙️",
             label: "Start Production",
             eventId: "PRODUCTION_STARTED",
             variant: "orangePrimary",
           },
         ],
-        description: "Order approved and ready for production.",
-        requiredRoles: ["admin", "vendor"],
+        description: "Admin is currently reviewing the order.",
+        requiredRoles: ["admin"],
         escalations: [],
       },
       {
@@ -214,11 +189,6 @@ export const ORDER_ITEM_FLOW_CONFIG = defineWorkflow({
       },
       {
         fromState: "IN_REVIEW",
-        eventId: "ADMIN_REVIEWED",
-        toState: "REVIEWED",
-      },
-      {
-        fromState: "REVIEWED",
         eventId: "PRODUCTION_STARTED",
         toState: "IN_PRODUCTION",
       },
